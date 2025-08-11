@@ -9,109 +9,36 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 import uuid
 import logging
+from secure_middleware import secure_middleware
 
 Base = declarative_base()
 
-# Security validation class for input sanitization
-class SecurityValidator:
-    """Input validation and sanitization for security purposes"""
+# SecurityValidator removed - validation now handled by secure_middleware.py
+
+def validate_json_data(data):
+    """Validate and sanitize JSON data"""
+    if not data:
+        return "{}"
     
-    @staticmethod
-    def sanitize_string(input_str, max_length=255):
-        """Sanitize string input to prevent injection attacks"""
-        if not input_str:
-            return ""
+    try:
+        # If it's already a dict, convert to JSON string
+        if isinstance(data, dict):
+            # Remove potentially dangerous keys
+            safe_data = {k: v for k, v in data.items() 
+                       if not k.startswith('_') and not callable(v)}
+            return json.dumps(safe_data)[:10000]  # Limit size
         
-        # Convert to string and limit length
-        safe_str = str(input_str)[:max_length]
+        # If it's a string, validate as JSON
+        elif isinstance(data, str):
+            parsed = json.loads(data)
+            return json.dumps(parsed)[:10000]
         
-        # Remove potentially dangerous characters
-        safe_str = re.sub(r'[<>&"\']', '', safe_str)
-        
-        # HTML escape for additional safety
-        safe_str = html.escape(safe_str)
-        
-        return safe_str.strip()
-    
-    @staticmethod
-    def validate_scan_type(scan_type):
-        """Validate scan type against allowed values"""
-        allowed_types = [
-            'network', 'vulnerability', 'password', 'hash', 'ip', 
-            'domain', 'email', 'log', 'threat_intel', 'port_scan'
-        ]
-        
-        if scan_type not in allowed_types:
-            raise ValueError(f"Invalid scan type: {scan_type}")
-        
-        return scan_type
-    
-    @staticmethod
-    def validate_severity(severity):
-        """Validate severity level"""
-        allowed_severities = ['critical', 'high', 'medium', 'low', 'info']
-        
-        if severity and severity.lower() not in allowed_severities:
-            raise ValueError(f"Invalid severity level: {severity}")
-        
-        return severity.lower() if severity else None
-    
-    @staticmethod
-    def validate_ip_address(ip_str):
-        """Basic IP address format validation"""
-        if not ip_str:
-            return ""
-        
-        # Simple regex for IPv4/IPv6 validation
-        ipv4_pattern = r'^(\d{1,3}\.){3}\d{1,3}$'
-        ipv6_pattern = r'^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$'
-        
-        if re.match(ipv4_pattern, ip_str) or re.match(ipv6_pattern, ip_str):
-            return ip_str
-        
-        # If not valid IP, sanitize as regular string
-        return SecurityValidator.sanitize_string(ip_str, 45)
-    
-    @staticmethod
-    def validate_url(url_str):
-        """Basic URL validation and sanitization"""
-        if not url_str:
-            return ""
-        
-        # Basic URL pattern validation
-        url_pattern = r'^https?://[^\s/$.?#].[^\s]*$'
-        
-        if re.match(url_pattern, url_str, re.IGNORECASE):
-            return url_str[:500]  # Limit URL length
-        
-        # If not valid URL, sanitize as string
-        return SecurityValidator.sanitize_string(url_str, 500)
-    
-    @staticmethod
-    def validate_json_data(data):
-        """Validate and sanitize JSON data"""
-        if not data:
-            return "{}"
-        
-        try:
-            # If it's already a dict, convert to JSON string
-            if isinstance(data, dict):
-                # Remove potentially dangerous keys
-                safe_data = {k: v for k, v in data.items() 
-                           if not k.startswith('_') and not callable(v)}
-                return json.dumps(safe_data)[:10000]  # Limit size
+        else:
+            return json.dumps(str(data))[:10000]
             
-            # If it's a string, validate as JSON
-            elif isinstance(data, str):
-                parsed = json.loads(data)
-                return json.dumps(parsed)[:10000]
-            
-            else:
-                return json.dumps(str(data))[:10000]
-                
-        except (json.JSONDecodeError, TypeError):
-            # If JSON parsing fails, return safe empty object
-            return "{}"
+    except (json.JSONDecodeError, TypeError):
+        # If JSON parsing fails, return safe empty object
+        return "{}"
 
 class ScanHistory(Base):
     __tablename__ = 'scan_history'
@@ -197,7 +124,7 @@ class DatabaseManager:
         
         self.engine = create_engine(self.database_url, **engine_config)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
-        self.validator = SecurityValidator()
+        # Security validation is handled by secure_middleware
         
         # Set up logging for security events
         logging.basicConfig(level=logging.WARNING)

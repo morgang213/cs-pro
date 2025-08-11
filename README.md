@@ -1,6 +1,31 @@
 # CyberSec Analyst Tool
 
-A comprehensive cybersecurity analysis and assessment platform built with Streamlit, providing a suite of security tools for network scanning, vulnerability assessment, password analysis, and threat intelligence.
+A comprehensive cybersecurity analysis and assessment platform with a **modern web-based user interface** built with Streamlit, providing a suite of security tools for network scanning, vulnerability assessment, password analysis, and threat intelligence.
+
+## 🌐 Web-Based User Interface
+
+This application provides a **complete web interface** accessible through your browser:
+
+### Quick Start
+```bash
+# Option 1: Easy startup script
+python3 start.py
+
+# Option 2: Direct launch
+streamlit run app.py --server.port 5500
+```
+
+**Access at:** `http://localhost:5500`
+
+The interface includes:
+- 📊 **Interactive Dashboard** with security metrics
+- 🔧 **19 Integrated Security Tools** 
+- 📈 **Real-time Charts and Visualizations**
+- 📄 **Report Generation and Export**
+- 🗂️ **Database Management Interface**
+- 👤 **Session Tracking and Analytics**
+
+> **See [UI_GUIDE.md](UI_GUIDE.md) for detailed interface documentation**
 
 ## Features
 
@@ -24,37 +49,113 @@ A comprehensive cybersecurity analysis and assessment platform built with Stream
 - **Report Generator**: Comprehensive security reports in multiple formats
 - **Dashboard**: Real-time security monitoring and analysis overview
 
-## Installation
+## 🚀 Installation
 
-The application runs on Replit with all dependencies automatically managed:
+### **Quick Install (Recommended)**
 
+#### **Linux/macOS:**
 ```bash
-# Dependencies are automatically installed via uv
-# Core packages: streamlit, pandas, plotly, requests
-# Security packages: cryptography, bcrypt, scapy, python-whois, dnspython, shodan, python-nmap
+# Download and extract
+wget https://github.com/morgang213/cs-pro/releases/latest/download/cybersec-terminal-v2.0.0.tar.gz
+tar -xzf cybersec-terminal-v2.0.0.tar.gz
+cd cybersec-terminal-v2.0.0/
+
+# One-command install
+./install.sh
+```
+
+#### **Windows:**
+1. Download `cybersec-terminal-v2.0.0.zip` from releases
+2. Extract the ZIP file
+3. Double-click `install.bat`
+
+### **Manual Installation**
+
+#### **Prerequisites:**
+- Python 3.7 or higher
+- pip (Python package installer)
+
+#### **Step-by-step:**
+```bash
+# Clone repository
+git clone https://github.com/morgang213/cs-pro.git
+cd cs-pro
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run application
+python terminal_web.py  # Web Terminal (recommended)
+# OR
+python app.py          # CLI Terminal
+```
+
+### **Package Installation**
+```bash
+# Install as Python package
+pip install cybersec-terminal
+
+# Run commands
+cybersec           # Launch interface selector
+cybersec-web       # Start web terminal
+cybersec-cli       # Start CLI terminal
 ```
 
 ## Usage
 
-1. **Start the Application**
-   ```bash
-   streamlit run app.py --server.port 5000
-   ```
+### **Quick Start Options:**
 
-2. **Access the Dashboard**
-   - Navigate to the provided URL (typically http://localhost:5000)
-   - Select tools from the sidebar navigation
+#### **1. Web Terminal (Recommended)**
+```bash
+# Launch web interface
+python terminal_web.py
+# OR
+cybersec-web
 
-3. **Tool-Specific Usage**
-   - **Network Scanner**: Enter target IP/hostname and select scan type
-   - **Vulnerability Assessment**: Input target URL and choose assessment type
-   - **Password Analyzer**: Enter password for strength evaluation
-   - **Hash Utils**: Generate or verify cryptographic hashes
-   - **IP Analysis**: Analyze IP addresses for geolocation and reputation
-   - **Domain Analysis**: Investigate domains with WHOIS and DNS analysis
-   - **Email Security**: Check email addresses and content for threats
-   - **Log Analysis**: Upload security logs for threat detection
-   - **Report Generator**: Create comprehensive security assessment reports
+# Access at: http://127.0.0.1:5000
+```
+
+#### **2. CLI Terminal**
+```bash
+# Launch command-line interface
+python app.py
+# OR
+cybersec-cli
+```
+
+#### **3. Interface Selector**
+```bash
+# Choose between web and CLI
+python launch_terminal.py
+# OR
+cybersec
+```
+
+### **Web Terminal Commands:**
+- `help` - Show all available commands
+- `menu` - Display security modules
+- `netscan <target>` - Network port scanning
+- `vulnscan <url>` - Web vulnerability assessment
+- `passcheck <password>` - Password strength analysis
+- `hash <algorithm> <text>` - Generate cryptographic hashes
+- `ipinfo <ip>` - IP geolocation and reputation
+- `domain <domain>` - WHOIS and DNS analysis
+- `clear` - Clear terminal screen
+
+### **Example Usage:**
+```bash
+# Network scan
+netscan 192.168.1.1
+
+# Vulnerability assessment
+vulnscan https://example.com
+
+# Password analysis
+passcheck "MySecurePassword123!"
+
+# Hash generation
+hash sha256 "hello world"
+```
 
 ## Security Features
 

@@ -1,0 +1,16 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+include TERMINAL_GUIDE.md
+include requirements.txt
+include install.sh
+include install.bat
+include *.py
+recursive-include cybersec_terminal *.py
+recursive-include cybersec_terminal/templates *.html
+recursive-include cybersec_terminal/static *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * *.egg-info

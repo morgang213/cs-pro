@@ -329,85 +329,9 @@ class SecurityMonitor:
             ])
         }
 
-class DataValidator:
-    """Enhanced data validation for SOC tools"""
-    
-    @staticmethod
-    def validate_ip_address(ip_str: str) -> Dict[str, Any]:
-        """Validate IP address with enhanced checks"""
-        try:
-            import ipaddress
-            ip = ipaddress.ip_address(ip_str.strip())
-            
-            return {
-                'is_valid': True,
-                'ip_type': 'IPv4' if ip.version == 4 else 'IPv6',
-                'is_private': ip.is_private,
-                'is_reserved': ip.is_reserved,
-                'is_multicast': ip.is_multicast,
-                'is_loopback': ip.is_loopback
-            }
-        except ValueError as e:
-            return {
-                'is_valid': False,
-                'error': str(e)
-            }
-    
-    @staticmethod
-    def validate_domain(domain_str: str) -> Dict[str, Any]:
-        """Validate domain name with security checks"""
-        domain = domain_str.strip().lower()
-        
-        # Basic format validation
-        domain_pattern = r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$'
-        
-        if not re.match(domain_pattern, domain):
-            return {'is_valid': False, 'error': 'Invalid domain format'}
-        
-        # Check for suspicious characteristics
-        warnings = []
-        
-        if len(domain) > 253:
-            warnings.append('Domain name too long')
-        
-        if domain.count('.') > 10:
-            warnings.append('Excessive subdomains')
-        
-        # Check for suspicious TLDs
-        suspicious_tlds = ['.tk', '.ml', '.ga', '.cf']
-        for tld in suspicious_tlds:
-            if domain.endswith(tld):
-                warnings.append(f'Suspicious TLD: {tld}')
-        
-        return {
-            'is_valid': True,
-            'domain': domain,
-            'warnings': warnings,
-            'risk_score': len(warnings) * 2
-        }
-    
-    @staticmethod
-    def sanitize_input(input_str: str, max_length: int = 1000) -> str:
-        """Sanitize input string for safe processing"""
-        if not input_str:
-            return ""
-        
-        # Truncate if too long
-        if len(input_str) > max_length:
-            input_str = input_str[:max_length]
-        
-        # Remove control characters
-        sanitized = ''.join(char for char in input_str if ord(char) >= 32 or char in '\t\n\r')
-        
-        # Escape potentially dangerous characters
-        sanitized = sanitized.replace('<', '&lt;')
-        sanitized = sanitized.replace('>', '&gt;')
-        sanitized = sanitized.replace('"', '&quot;')
-        sanitized = sanitized.replace("'", '&#x27;')
-        
-        return sanitized.strip()
+# Input validation is now handled by secure_middleware.py - removed DataValidator class to eliminate redundancy
 
 # Global instances for use across SOC platform
 performance_optimizer = PerformanceOptimizer()
 security_monitor = SecurityMonitor()
-data_validator = DataValidator()
+# data_validator removed - use secure_middleware for input validation

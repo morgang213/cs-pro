@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberSec Terminal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #00ff41;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Matrix rain effect background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .matrix-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 65, 0.03) 2px,
+                    rgba(0, 255, 65, 0.03) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 65, 0.03) 2px,
+                    rgba(0, 255, 65, 0.03) 4px
+                );
+            animation: matrix-scroll 20s linear infinite;
+        }
+
+        @keyframes matrix-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(20px); }
+        }
+
+        .terminal-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid #00ff41;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 65, 0.3),
+                inset 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .terminal-header {
+            background: linear-gradient(90deg, #003300 0%, #006600 50%, #003300 100%);
+            padding: 8px 15px;
+            border-bottom: 1px solid #00ff41;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 255, 65, 0.2);
+        }
+
+        .terminal-title {
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn.close { background: #ff5555; }
+        .control-btn.minimize { background: #ffb86c; }
+        .control-btn.maximize { background: #50fa7b; }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 5px currentColor;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        .terminal-output {
+            min-height: calc(100vh - 150px);
+            padding-bottom: 60px;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .prompt {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .command {
+            color: #8be9fd;
+            margin-left: 8px;
+        }
+
+        .output {
+            color: #f8f8f2;
+            margin-left: 0;
+            padding: 4px 0;
+        }
+
+        .input-container {
+            position: sticky;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 20px;
+            border-top: 1px solid #00ff41;
+            display: flex;
+            align-items: center;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .current-prompt {
+            color: #50fa7b;
+            font-weight: bold;
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+
+        .command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #8be9fd;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            caret-color: #00ff41;
+        }
+
+        .command-input::placeholder {
+            color: #6272a4;
+        }
+
+        /* Styling for different output types */
+        .help-header {
+            color: #ff79c6;
+            font-weight: bold;
+            font-size: 16px;
+            text-decoration: underline;
+        }
+
+        .help-section {
+            color: #ffb86c;
+            font-weight: bold;
+            margin-top: 12px;
+            margin-bottom: 4px;
+        }
+
+        .help-footer {
+            color: #6272a4;
+            font-style: italic;
+            margin-top: 12px;
+        }
+
+        .menu-header {
+            color: #ff79c6;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .menu-item {
+            color: #8be9fd;
+            font-weight: bold;
+        }
+
+        .tool-name {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .tool-header {
+            color: #ff79c6;
+            font-weight: bold;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .scan-progress {
+            color: #8be9fd;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .results-header {
+            color: #ffb86c;
+            font-weight: bold;
+            margin: 12px 0 8px 0;
+            display: block;
+        }
+
+        .port-open {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .port-filtered {
+            color: #ffb86c;
+            font-weight: bold;
+        }
+
+        .scan-complete {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .vuln-high {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .vuln-medium {
+            color: #ffb86c;
+            font-weight: bold;
+        }
+
+        .vuln-low {
+            color: #8be9fd;
+            font-weight: bold;
+        }
+
+        .vuln-warning {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .strength-weak {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .strength-moderate {
+            color: #ffb86c;
+            font-weight: bold;
+        }
+
+        .strength-strong {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .hash-result {
+            color: #8be9fd;
+            font-weight: bold;
+            word-break: break-all;
+            background: rgba(139, 233, 253, 0.1);
+            padding: 8px;
+            border-radius: 4px;
+            display: block;
+            margin-top: 8px;
+        }
+
+        .status-header {
+            color: #ff79c6;
+            font-weight: bold;
+            font-size: 16px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .status-good {
+            color: #50fa7b;
+        }
+
+        .status-info {
+            color: #8be9fd;
+        }
+
+        .error {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        /* Scrollbar styling */
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: #00ff41;
+            border-radius: 4px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: #50fa7b;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+        }
+
+        .loading::after {
+            content: '|';
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Welcome message styling */
+        .welcome-banner {
+            color: #50fa7b;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.05);
+            border-radius: 8px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .terminal-container {
+                height: 100vh;
+            }
+            
+            .terminal-body {
+                padding: 10px;
+            }
+            
+            .input-container {
+                padding: 10px;
+            }
+            
+            .current-prompt {
+                font-size: 12px;
+            }
+            
+            .command-input {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg"></div>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-title">
+                🛡️ CyberSec Terminal v2.0 - Professional Security Analysis
+            </div>
+            <div class="terminal-controls">
+                <div class="control-btn minimize"></div>
+                <div class="control-btn maximize"></div>
+                <div class="control-btn close" onclick="if(confirm('Close terminal?')) window.close()"></div>
+            </div>
+        </div>
+        
+        <div class="terminal-body">
+            <div class="terminal-output" id="terminal-output">
+                <div class="welcome-banner">
+                    ╔═══════════════════════════════════════════════════════════════╗<br>
+                    ║                 CYBERSEC TERMINAL v2.0                       ║<br>
+                    ║              Professional Security Analysis                   ║<br>
+                    ║                                                               ║<br>
+                    ║  🌐 Network Analysis    🔍 Vulnerability Assessment          ║<br>
+                    ║  🔐 Password Security   📍 IP Intelligence                   ║<br>
+                    ║  🌍 Domain Analysis     📧 Email Security                    ║<br>
+                    ║  📊 Log Analysis        📋 Report Generation                 ║<br>
+                    ║                                                               ║<br>
+                    ║              Type 'help' for commands | 'menu' for tools     ║<br>
+                    ╚═══════════════════════════════════════════════════════════════╝
+                </div>
+                
+                <div class="terminal-line">
+                    <span class="output">Welcome to CyberSec Terminal! Type 'help' for available commands.</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-container">
+            <span class="current-prompt" id="prompt">cybersec@security-terminal:~$ </span>
+            <input 
+                type="text" 
+                class="command-input" 
+                id="command-input" 
+                placeholder="Enter command..."
+                autocomplete="off"
+                autofocus
+            >
+        </div>
+    </div>
+
+    <script>
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        const terminalOutput = document.getElementById('terminal-output');
+        const commandInput = document.getElementById('command-input');
+        const prompt = document.getElementById('prompt');
+
+        // Focus input when clicking anywhere
+        document.addEventListener('click', () => {
+            commandInput.focus();
+        });
+
+        // Handle command input
+        commandInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                
+                if (command) {
+                    // Add to history
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                    
+                    // Display command
+                    addTerminalLine(prompt.textContent + command, 'command');
+                    
+                    // Clear input
+                    commandInput.value = '';
+                    
+                    // Execute command
+                    await executeCommand(command);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    commandInput.value = '';
+                }
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                // Tab completion could be implemented here
+                const commands = ['help', 'menu', 'clear', 'status', 'netscan', 'vulnscan', 'passcheck', 'hash', 'ipinfo', 'domain', 'email', 'logs', 'report'];
+                const currentInput = commandInput.value.toLowerCase();
+                const matches = commands.filter(cmd => cmd.startsWith(currentInput));
+                if (matches.length === 1) {
+                    commandInput.value = matches[0] + ' ';
+                }
+            }
+        });
+
+        async function executeCommand(command) {
+            if (command.toLowerCase() === 'clear') {
+                clearTerminal();
+                return;
+            }
+
+            // Show loading
+            const loadingLine = addTerminalLine('Processing...', 'output loading');
+            
+            try {
+                const response = await fetch('/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+
+                const data = await response.json();
+                
+                // Remove loading line
+                loadingLine.remove();
+                
+                // Update prompt
+                prompt.textContent = data.prompt;
+                
+                // Display output
+                if (data.output) {
+                    addTerminalLine(data.output, 'output');
+                }
+                
+            } catch (error) {
+                loadingLine.remove();
+                addTerminalLine(`Error: ${error.message}`, 'output error');
+            }
+
+            // Scroll to bottom
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function addTerminalLine(content, className) {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${className}`;
+            
+            if (className === 'output') {
+                line.innerHTML = content; // Allow HTML in output for styling
+            } else {
+                line.textContent = content;
+            }
+            
+            terminalOutput.appendChild(line);
+            
+            // Auto-scroll to bottom
+            setTimeout(() => {
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }, 10);
+            
+            return line;
+        }
+
+        function clearTerminal() {
+            const welcomeBanner = document.querySelector('.welcome-banner');
+            terminalOutput.innerHTML = '';
+            if (welcomeBanner) {
+                terminalOutput.appendChild(welcomeBanner.cloneNode(true));
+            }
+        }
+
+        // Auto-focus input on load
+        window.addEventListener('load', () => {
+            commandInput.focus();
+        });
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        // Disable text selection except in output
+        document.addEventListener('selectstart', (e) => {
+            if (!e.target.closest('.terminal-output')) {
+                e.preventDefault();
+            }
+        });
+
+        // Matrix effect enhancement
+        setInterval(() => {
+            const matrixBg = document.querySelector('.matrix-bg');
+            matrixBg.style.transform = `translateY(${Math.random() * 5}px)`;
+        }, 100);
+    </script>
+</body>
+</html>
