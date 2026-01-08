@@ -1,0 +1,363 @@
+name: Release and Deploy
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 2.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build Release Packages
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel build twine
+
+    - name: Install project dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Get version
+      id: get_version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Release version: ${VERSION}"
+
+    - name: Update version in setup.py
+      run: |
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        sed -i "s/version=\".*\"/version=\"${VERSION}\"/" setup.py
+        cat setup.py | grep version=
+
+    - name: Build distributions
+      run: |
+        # Clean previous builds
+        rm -rf build/ dist/ *.egg-info/
+        
+        # Build source and wheel distributions
+        python setup.py sdist bdist_wheel
+        
+        # Verify distributions
+        twine check dist/*
+
+    - name: Create release archives
+      run: |
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        RELEASE_NAME="cybersec-terminal-v${VERSION}"
+        RELEASE_DIR="dist/${RELEASE_NAME}"
+        
+        # Create release directory structure
+        mkdir -p "${RELEASE_DIR}"
+        
+        # Copy essential files
+        cp -r templates "${RELEASE_DIR}/" 2>/dev/null || echo "No templates directory"
+        cp README.md "${RELEASE_DIR}/"
+        cp LICENSE "${RELEASE_DIR}/"
+        cp CHANGELOG.md "${RELEASE_DIR}/"
+        cp CONTRIBUTING.md "${RELEASE_DIR}/"
+        cp TERMINAL_GUIDE.md "${RELEASE_DIR}/"
+        cp QUICKSTART.md "${RELEASE_DIR}/"
+        cp requirements.txt "${RELEASE_DIR}/"
+        cp setup.py "${RELEASE_DIR}/"
+        cp MANIFEST.in "${RELEASE_DIR}/"
+        cp install.sh "${RELEASE_DIR}/"
+        cp install.bat "${RELEASE_DIR}/"
+        cp *.py "${RELEASE_DIR}/" 2>/dev/null || echo "No Python files to copy"
+        
+        # Make install scripts executable
+        chmod +x "${RELEASE_DIR}/install.sh"
+        
+        # Create archives
+        cd dist/
+        tar -czf "${RELEASE_NAME}.tar.gz" "${RELEASE_NAME}/"
+        zip -r "${RELEASE_NAME}.zip" "${RELEASE_NAME}/" > /dev/null
+        
+        # Generate checksums
+        shasum -a 256 "${RELEASE_NAME}.tar.gz" > "${RELEASE_NAME}.tar.gz.sha256"
+        shasum -a 256 "${RELEASE_NAME}.zip" > "${RELEASE_NAME}.zip.sha256"
+        
+        # List created files
+        ls -lh
+
+    - name: Create installation guide
+      run: |
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        RELEASE_NAME="cybersec-terminal-v${VERSION}"
+        
+        cat > "dist/${RELEASE_NAME}/INSTALL.md" << 'EOF'
+        # CyberSec Terminal - Installation Instructions
+
+        ## Quick Install
+
+        ### Linux/macOS:
+        ```bash
+        # Extract the archive
+        tar -xzf cybersec-terminal-v*.tar.gz
+        cd cybersec-terminal-v*
+
+        # Run installation script
+        ./install.sh
+        ```
+
+        ### Windows:
+        ```cmd
+        # Extract the ZIP file
+        # Navigate to the extracted folder
+        # Double-click install.bat
+        ```
+
+        ## Manual Install
+
+        ### 1. Install Python 3.7+
+        Download from: https://www.python.org/downloads/
+
+        ### 2. Install Dependencies
+        ```bash
+        pip install -r requirements.txt
+        ```
+
+        ### 3. Run the Application
+        ```bash
+        # Web Terminal (recommended)
+        python terminal_web.py
+
+        # CLI Terminal
+        python app.py
+
+        # Launcher (choose interface)
+        python launch_terminal.py
+        ```
+
+        ## Usage
+
+        ### Web Terminal
+        1. Run `python terminal_web.py`
+        2. Open http://127.0.0.1:5000 in your browser
+        3. Type `help` for available commands
+
+        ### Available Commands
+        - `menu` - Show security tools
+        - `netscan <target>` - Network scanning
+        - `vulnscan <url>` - Vulnerability assessment
+        - `passcheck <password>` - Password analysis
+        - `hash <algorithm> <text>` - Hash generation
+        - `help` - Show all commands
+
+        ## Security Notice
+        ⚠️ Use only on systems you own or have permission to test.
+        This tool is for educational and authorized security testing only.
+        EOF
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-packages
+        path: |
+          dist/*.tar.gz
+          dist/*.zip
+          dist/*.whl
+          dist/*.sha256
+        retention-days: 30
+
+  create-release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: release-packages
+        path: dist/
+
+    - name: Get version
+      id: get_version
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION=${GITHUB_REF#refs/tags/v}
+        fi
+        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        echo "TAG=v${VERSION}" >> $GITHUB_OUTPUT
+
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        VERSION="${{ steps.get_version.outputs.VERSION }}"
+        
+        cat > RELEASE_NOTES.md << EOF
+        # CyberSec Terminal v${VERSION}
+
+        ## 🚀 Professional Cybersecurity Analysis Platform
+
+        A comprehensive cybersecurity analysis and assessment platform with modern web-based and CLI interfaces.
+
+        ## ✨ Features
+
+        ### 🌐 Network Security
+        - Network Scanner with port scanning and host discovery
+        - Vulnerability Assessment for web applications
+        - IP Analysis with geolocation and threat intelligence
+
+        ### 🔐 Security Analysis
+        - Password Analyzer with entropy calculation
+        - Hash Generator/Verifier supporting multiple algorithms
+        - Email Security analysis and phishing detection
+
+        ### 🌍 Domain Intelligence
+        - WHOIS Analysis with domain registration info
+        - DNS Security configuration analysis
+        - Domain Reputation assessment
+
+        ### 📊 Monitoring & Reporting
+        - Security Log Analysis with threat detection
+        - Report Generator for comprehensive security reports
+        - Real-time Dashboard for security monitoring
+
+        ## 📦 Installation
+
+        ### Quick Install (Linux/macOS)
+        \`\`\`bash
+        wget https://github.com/morgang213/cs-pro/releases/download/v${VERSION}/cybersec-terminal-v${VERSION}.tar.gz
+        tar -xzf cybersec-terminal-v${VERSION}.tar.gz
+        cd cybersec-terminal-v${VERSION}/
+        ./install.sh
+        \`\`\`
+
+        ### Quick Install (Windows)
+        1. Download \`cybersec-terminal-v${VERSION}.zip\`
+        2. Extract the ZIP file
+        3. Run \`install.bat\`
+
+        ### Using pip
+        \`\`\`bash
+        pip install cybersec-terminal
+        \`\`\`
+
+        ## 🔧 Usage
+
+        ### Web Interface (Recommended)
+        \`\`\`bash
+        python terminal_web.py
+        # Access at http://127.0.0.1:5000
+        \`\`\`
+
+        ### CLI Terminal
+        \`\`\`bash
+        python app.py
+        \`\`\`
+
+        ## 📋 System Requirements
+
+        - Python 3.7 or higher
+        - 256MB RAM minimum
+        - 50MB disk space
+        - Port 5000 available (for web interface)
+
+        ## 🛡️ Security Notice
+
+        ⚠️ **Important**: This tool is designed for authorized security testing and educational purposes only. Users must ensure they have proper authorization before conducting any security assessments.
+
+        ## 📚 Documentation
+
+        - [README.md](https://github.com/morgang213/cs-pro/blob/main/README.md) - Main documentation
+        - [TERMINAL_GUIDE.md](https://github.com/morgang213/cs-pro/blob/main/TERMINAL_GUIDE.md) - Usage guide
+        - [QUICKSTART.md](https://github.com/morgang213/cs-pro/blob/main/QUICKSTART.md) - Quick start guide
+        - [CONTRIBUTING.md](https://github.com/morgang213/cs-pro/blob/main/CONTRIBUTING.md) - Contributing guidelines
+
+        ## 🔐 Checksums
+
+        Verify your downloads with SHA-256:
+        \`\`\`bash
+        shasum -a 256 -c cybersec-terminal-v${VERSION}.tar.gz.sha256
+        shasum -a 256 -c cybersec-terminal-v${VERSION}.zip.sha256
+        \`\`\`
+
+        ## 📞 Support
+
+        - [Report Issues](https://github.com/morgang213/cs-pro/issues)
+        - [View Source](https://github.com/morgang213/cs-pro)
+        - [Documentation](https://github.com/morgang213/cs-pro/blob/main/README.md)
+
+        ## 📄 License
+
+        MIT License - See [LICENSE](LICENSE) for details
+        EOF
+        
+        cat RELEASE_NOTES.md
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.get_version.outputs.TAG }}
+        name: CyberSec Terminal v${{ steps.get_version.outputs.VERSION }}
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: false
+        files: |
+          dist/*.tar.gz
+          dist/*.zip
+          dist/*.whl
+          dist/*.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build, create-release]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: release-packages
+        path: dist/
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        skip_existing: true
+      continue-on-error: true

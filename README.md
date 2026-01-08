@@ -255,6 +255,70 @@ Set these as environment variables to enable enhanced features.
 - Multiple export formats
 - Template-based reporting
 
+## 🐳 Deployment
+
+### Docker Deployment
+
+#### Using Pre-built Images
+```bash
+# Pull from GitHub Container Registry
+docker pull ghcr.io/morgang213/cs-pro:latest
+
+# Run container
+docker run -d -p 5000:5000 ghcr.io/morgang213/cs-pro:latest
+
+# Access at http://localhost:5000
+```
+
+#### Using Docker Compose
+```bash
+# Clone repository
+git clone https://github.com/morgang213/cs-pro.git
+cd cs-pro
+
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+#### Building Custom Image
+```bash
+# Build image
+docker build -t cybersec-terminal:custom .
+
+# Run with custom configuration
+docker run -d \
+  -p 5000:5000 \
+  -e IPINFO_TOKEN=your_token \
+  -e VIRUSTOTAL_API_KEY=your_key \
+  cybersec-terminal:custom
+```
+
+### CI/CD Workflows
+
+This repository includes comprehensive GitHub Actions workflows for automated testing, building, and deployment:
+
+- **CI Pipeline**: Automated testing on multiple Python versions
+- **Release & Deploy**: Automatic release creation when tags are pushed
+- **Security Audit**: Weekly dependency and security scans
+- **Code Quality**: Automated code quality checks
+- **Docker Build**: Multi-platform Docker image builds
+
+**Creating a Release:**
+```bash
+# Update version and create tag
+git tag -a v2.0.1 -m "Release version 2.0.1"
+git push origin v2.0.1
+# Workflow automatically creates GitHub release with packages
+```
+
+For detailed workflow documentation, see [.github/WORKFLOWS.md](.github/WORKFLOWS.md)
+
 ## Configuration
 
 ### Server Configuration (`.streamlit/config.toml`)
