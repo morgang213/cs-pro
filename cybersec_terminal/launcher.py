@@ -5,7 +5,6 @@ Unified launcher for both CLI and Web Terminal interfaces
 """
 
 import sys
-import os
 
 def print_banner():
     banner = """

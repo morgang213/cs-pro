@@ -11,17 +11,17 @@ All distribution packages have been built and are located in the `dist/` directo
 1. **cybersec-terminal-v2.0.0.tar.gz** (141KB)
    - Full release package for Linux/macOS users
    - Includes all source files, installation scripts, and documentation
-   - SHA-256: `0b5db9375c9da21fd85b797c96f98e0d8fc5d88a8619bb4306f9754fc5528bf2`
+   - SHA-256: `8876cd194cd2aec49cc900bcdb03f6fef16b602d10f7bbccb1000849e03b20d7`
 
 2. **cybersec-terminal-v2.0.0.zip** (162KB)
    - Full release package for Windows users
    - Includes all source files, installation scripts, and documentation
-   - SHA-256: `b9dd3b1922678dead6f361342b7da2754e8c8a195460961acb437d9937c41212`
+   - SHA-256: `8014654a80989884f448fc296cb7ccce65a21703ea8850f17a69bdd560a2e41f`
 
 3. **cybersec_terminal-2.0.0-py3-none-any.whl** (21KB)
    - Python wheel package for pip installation
    - Works on all platforms with Python 3.7+
-   - SHA-256: `19ad78c5ba6e7232f029f26fb646f215ec18d69b79cc661fbd4adf1443dadf82`
+   - SHA-256: `955dd1ef9c6e246567260d6b0bc7de2937f4b96f34c54fd6b86ad6c9aa7b4746`
 
 4. **cybersec_terminal-2.0.0.tar.gz** (143KB)
    - Python source distribution for pip installation
