@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  cybersec-terminal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: "2.0.0"
+        BUILD_DATE: ${BUILD_DATE:-2026-01-08}
+    image: cybersec-terminal:latest
+    container_name: cybersec-terminal
+    ports:
+      - "5000:5000"
+      - "5500:5500"
+    environment:
+      - PORT=5000
+      - PYTHONUNBUFFERED=1
+      # Add API keys as needed (use .env file for security)
+      - IPINFO_TOKEN=${IPINFO_TOKEN:-}
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY:-}
+      - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY:-}
+    volumes:
+      # Mount data directory for persistence
+      - data:/app/data
+    restart: unless-stopped
+    networks:
+      - cybersec-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    read_only: false
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  cybersec-network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

@@ -1,0 +1,192 @@
+name: Code Quality and Documentation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-quality-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-quality-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 pylint black isort mypy radon
+
+    - name: Check code formatting with black
+      run: |
+        black --check --diff . || true
+      continue-on-error: true
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff . || true
+      continue-on-error: true
+
+    - name: Run flake8
+      run: |
+        # Comprehensive flake8 check
+        flake8 . --count --statistics --max-line-length=127 --exclude=venv,env,build,dist || true
+      continue-on-error: true
+
+    - name: Run pylint
+      run: |
+        find . -name "*.py" -not -path "./venv/*" -not -path "./env/*" -not -path "./build/*" -not -path "./dist/*" | xargs pylint --exit-zero --output-format=text || true
+      continue-on-error: true
+
+    - name: Calculate code complexity
+      run: |
+        echo "## Code Complexity Report" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        radon cc . -a -s || true
+        radon cc . -a -s >> $GITHUB_STEP_SUMMARY || true
+
+    - name: Calculate maintainability index
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Maintainability Index" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        radon mi . -s || true
+        radon mi . -s >> $GITHUB_STEP_SUMMARY || true
+
+  documentation-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check for required documentation
+      run: |
+        echo "# Documentation Check" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # List of required documentation files
+        REQUIRED_DOCS=(
+          "README.md"
+          "LICENSE"
+          "CHANGELOG.md"
+          "CONTRIBUTING.md"
+          "TERMINAL_GUIDE.md"
+          "QUICKSTART.md"
+        )
+        
+        MISSING_DOCS=()
+        
+        for doc in "${REQUIRED_DOCS[@]}"; do
+          if [ -f "$doc" ]; then
+            echo "✅ $doc exists" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ $doc is missing" >> $GITHUB_STEP_SUMMARY
+            MISSING_DOCS+=("$doc")
+          fi
+        done
+        
+        if [ ${#MISSING_DOCS[@]} -eq 0 ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All required documentation files are present! ✅" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Missing documentation files: ${MISSING_DOCS[*]}" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Check README completeness
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## README.md Completeness" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Check for important sections in README
+        SECTIONS=(
+          "Installation"
+          "Usage"
+          "Features"
+          "License"
+        )
+        
+        for section in "${SECTIONS[@]}"; do
+          if grep -qi "$section" README.md; then
+            echo "✅ $section section found" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ $section section might be missing" >> $GITHUB_STEP_SUMMARY
+          fi
+        done
+
+    - name: Check for TODO comments
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## TODO Items Found" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        TODO_COUNT=$(grep -r "TODO\|FIXME\|XXX" --include="*.py" . | wc -l)
+        
+        if [ "$TODO_COUNT" -gt 0 ]; then
+          echo "Found $TODO_COUNT TODO/FIXME/XXX comments in Python files" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          grep -r "TODO\|FIXME\|XXX" --include="*.py" . | head -20 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        else
+          echo "No TODO/FIXME/XXX comments found ✅" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  link-checker:
+    name: Check Documentation Links
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check links in markdown files
+      uses: gaurav-nelson/github-action-markdown-link-check@1.0.15
+      with:
+        use-quiet-mode: 'yes'
+        config-file: '.github/markdown-link-check-config.json'
+      continue-on-error: true
+
+  spell-check:
+    name: Spell Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Spell check
+      uses: rojopolis/spellcheck-github-actions@0.35.0
+      with:
+        config_path: .github/spellcheck-config.yml
+      continue-on-error: true
