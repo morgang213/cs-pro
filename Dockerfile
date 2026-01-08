@@ -1,10 +1,14 @@
 # Multi-stage build for CyberSec Terminal
-FROM python:3.11-slim as builder
+# Set Python version as build arg for flexibility
+ARG PYTHON_VERSION=3.11
+
+FROM python:${PYTHON_VERSION}-slim as builder
 
 # Set build arguments
 ARG VERSION=2.0.0
 ARG BUILD_DATE
 ARG VCS_REF
+ARG PYTHON_VERSION=3.11
 
 # Labels for metadata
 LABEL org.opencontainers.image.title="CyberSec Terminal" \
@@ -33,9 +37,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Production stage
-FROM python:3.11-slim as production
+FROM python:${PYTHON_VERSION}-slim as production
 
-# Set Python version as build arg for flexibility
+# Set Python version as build arg for this stage
 ARG PYTHON_VERSION=3.11
 
 # Set working directory
