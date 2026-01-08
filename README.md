@@ -1,5 +1,11 @@
 # CyberSec Analyst Tool
 
+[![CI Pipeline](https://github.com/morgang213/cs-pro/workflows/CI%20Pipeline/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/ci.yml)
+[![Release](https://github.com/morgang213/cs-pro/workflows/Release%20and%20Deploy/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/deploy.yml)
+[![Security Audit](https://github.com/morgang213/cs-pro/workflows/Dependency%20and%20Security%20Audit/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/security-audit.yml)
+[![Docker](https://github.com/morgang213/cs-pro/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/docker.yml)
+[![Code Quality](https://github.com/morgang213/cs-pro/workflows/Code%20Quality%20and%20Documentation/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/code-quality.yml)
+
 A comprehensive cybersecurity analysis and assessment platform with a **modern web-based user interface** built with Streamlit, providing a suite of security tools for network scanning, vulnerability assessment, password analysis, and threat intelligence.
 
 ## 🌐 Web-Based User Interface
