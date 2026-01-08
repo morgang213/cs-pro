@@ -6,7 +6,6 @@ Unified launcher for both CLI and Web Terminal interfaces
 
 import sys
 import os
-import subprocess
 
 def print_banner():
     banner = """
@@ -34,10 +33,9 @@ def main():
             print("🔒 Press Ctrl+C to stop the server\n")
             
             try:
-                subprocess.run([
-                    "/Users/morgangamble/Documents/Coding projects/cs-pro/.venv/bin/python",
-                    "terminal_web.py"
-                ], cwd="/Users/morgangamble/Documents/Coding projects/cs-pro")
+                # Import and run the web terminal module
+                from cybersec_terminal.web import main as web_main
+                web_main()
             except KeyboardInterrupt:
                 print("\n✓ Web terminal stopped")
             break
@@ -46,10 +44,9 @@ def main():
             print("\n🚀 Starting CLI Terminal...\n")
             
             try:
-                subprocess.run([
-                    "/Users/morgangamble/Documents/Coding projects/cs-pro/.venv/bin/python",
-                    "app.py"
-                ], cwd="/Users/morgangamble/Documents/Coding projects/cs-pro")
+                # Import and run the CLI terminal module
+                from cybersec_terminal.cli import main as cli_main
+                cli_main()
             except KeyboardInterrupt:
                 print("\n✓ CLI terminal stopped")
             break

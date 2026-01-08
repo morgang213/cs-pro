@@ -13,9 +13,9 @@ We are excited to announce the first official release of CyberSec Terminal, a co
 
 ### 🔐 Checksums (SHA-256)
 ```
-0b5db9375c9da21fd85b797c96f98e0d8fc5d88a8619bb4306f9754fc5528bf2  cybersec-terminal-v2.0.0.tar.gz
-b9dd3b1922678dead6f361342b7da2754e8c8a195460961acb437d9937c41212  cybersec-terminal-v2.0.0.zip
-19ad78c5ba6e7232f029f26fb646f215ec18d69b79cc661fbd4adf1443dadf82  cybersec_terminal-2.0.0-py3-none-any.whl
+8876cd194cd2aec49cc900bcdb03f6fef16b602d10f7bbccb1000849e03b20d7  cybersec-terminal-v2.0.0.tar.gz
+8014654a80989884f448fc296cb7ccce65a21703ea8850f17a69bdd560a2e41f  cybersec-terminal-v2.0.0.zip
+955dd1ef9c6e246567260d6b0bc7de2937f4b96f34c54fd6b86ad6c9aa7b4746  cybersec_terminal-2.0.0-py3-none-any.whl
 ```
 
 ### ✨ Key Features
