@@ -1,10 +1,17 @@
 #!/usr/bin/env python3
 """
 CyberSec Terminal Launcher
-Unified launcher for both CLI and Web Terminal interfaces
+
+Unified launcher for both CLI and Web Terminal interfaces.
+Provides an interactive menu for users to select which terminal
+interface they want to use: web-based or command-line.
 """
 
 import sys
+
+# Import terminal modules at the top for efficiency
+from cybersec_terminal.web import main as web_main
+from cybersec_terminal.cli import main as cli_main
 
 def print_banner():
     banner = """
@@ -32,8 +39,6 @@ def main():
             print("🔒 Press Ctrl+C to stop the server\n")
             
             try:
-                # Import and run the web terminal module
-                from cybersec_terminal.web import main as web_main
                 web_main()
             except KeyboardInterrupt:
                 print("\n✓ Web terminal stopped")
@@ -43,8 +48,6 @@ def main():
             print("\n🚀 Starting CLI Terminal...\n")
             
             try:
-                # Import and run the CLI terminal module
-                from cybersec_terminal.cli import main as cli_main
                 cli_main()
             except KeyboardInterrupt:
                 print("\n✓ CLI terminal stopped")

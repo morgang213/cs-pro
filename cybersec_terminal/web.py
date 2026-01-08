@@ -459,7 +459,13 @@ Licensed: Professional Use""",
     return files.get(filename, f"cat: {filename}: No such file or directory")
 
 def main():
-    """Main entry point for the web terminal"""
+    """
+    Main entry point for the CyberSec web terminal.
+    
+    Starts the Flask web server on port 5000 and automatically
+    opens the terminal interface in the user's default web browser.
+    The server runs until interrupted with Ctrl+C.
+    """
     # Open browser automatically
     def open_browser():
         time.sleep(1)
