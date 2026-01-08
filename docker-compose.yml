@@ -21,8 +21,8 @@ services:
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY:-}
       - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY:-}
     volumes:
-      # Mount config directory for persistence
-      - ./data:/app/data
+      # Mount data directory for persistence
+      - data:/app/data
     restart: unless-stopped
     networks:
       - cybersec-network

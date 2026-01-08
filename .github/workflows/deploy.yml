@@ -66,8 +66,8 @@ jobs:
         # Clean previous builds
         rm -rf build/ dist/ *.egg-info/
         
-        # Build source and wheel distributions
-        python setup.py sdist bdist_wheel
+        # Build source and wheel distributions using modern build tool
+        python -m build
         
         # Verify distributions
         twine check dist/*
