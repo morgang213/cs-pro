@@ -458,7 +458,8 @@ Licensed: Professional Use""",
     
     return files.get(filename, f"cat: {filename}: No such file or directory")
 
-if __name__ == '__main__':
+def main():
+    """Main entry point for the web terminal"""
     # Open browser automatically
     def open_browser():
         time.sleep(1)
@@ -471,3 +472,6 @@ if __name__ == '__main__':
     print("🔒 Press Ctrl+C to stop the server")
     
     app.run(debug=False, host='127.0.0.1', port=5000)
+
+if __name__ == '__main__':
+    main()

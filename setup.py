@@ -55,9 +55,9 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "cybersec-terminal=app:main",
-            "cybersec-web=terminal_web:main",
-            "cybersec=launch_terminal:main",
+            "cybersec-terminal=cybersec_terminal.cli:main",
+            "cybersec-web=cybersec_terminal.web:main",
+            "cybersec=cybersec_terminal.launcher:main",
         ],
     },
     include_package_data=True,
