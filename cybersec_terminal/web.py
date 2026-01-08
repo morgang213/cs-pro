@@ -458,7 +458,14 @@ Licensed: Professional Use""",
     
     return files.get(filename, f"cat: {filename}: No such file or directory")
 
-if __name__ == '__main__':
+def main():
+    """
+    Main entry point for the CyberSec web terminal.
+    
+    Starts the Flask web server on port 5000 and automatically
+    opens the terminal interface in the user's default web browser.
+    The server runs until interrupted with Ctrl+C.
+    """
     # Open browser automatically
     def open_browser():
         time.sleep(1)
@@ -471,3 +478,6 @@ if __name__ == '__main__':
     print("🔒 Press Ctrl+C to stop the server")
     
     app.run(debug=False, host='127.0.0.1', port=5000)
+
+if __name__ == '__main__':
+    main()

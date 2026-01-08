@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """
 CyberSec Terminal Launcher
-Unified launcher for both CLI and Web Terminal interfaces
+
+Unified launcher for both CLI and Web Terminal interfaces.
+Provides an interactive menu for users to select which terminal
+interface they want to use: web-based or command-line.
 """
 
 import sys
-import os
-import subprocess
+
+# Import terminal modules at the top for efficiency
+from cybersec_terminal.web import main as web_main
+from cybersec_terminal.cli import main as cli_main
 
 def print_banner():
     banner = """
@@ -34,10 +39,7 @@ def main():
             print("🔒 Press Ctrl+C to stop the server\n")
             
             try:
-                subprocess.run([
-                    "/Users/morgangamble/Documents/Coding projects/cs-pro/.venv/bin/python",
-                    "terminal_web.py"
-                ], cwd="/Users/morgangamble/Documents/Coding projects/cs-pro")
+                web_main()
             except KeyboardInterrupt:
                 print("\n✓ Web terminal stopped")
             break
@@ -46,10 +48,7 @@ def main():
             print("\n🚀 Starting CLI Terminal...\n")
             
             try:
-                subprocess.run([
-                    "/Users/morgangamble/Documents/Coding projects/cs-pro/.venv/bin/python",
-                    "app.py"
-                ], cwd="/Users/morgangamble/Documents/Coding projects/cs-pro")
+                cli_main()
             except KeyboardInterrupt:
                 print("\n✓ CLI terminal stopped")
             break
