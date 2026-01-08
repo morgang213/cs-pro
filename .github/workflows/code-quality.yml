@@ -10,6 +10,8 @@ jobs:
   code-quality:
     name: Code Quality Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -75,6 +77,8 @@ jobs:
   documentation-check:
     name: Documentation Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -157,6 +161,8 @@ jobs:
   link-checker:
     name: Check Documentation Links
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
@@ -172,6 +178,8 @@ jobs:
   spell-check:
     name: Spell Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
