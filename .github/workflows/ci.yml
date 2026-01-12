@@ -48,7 +48,19 @@ jobs:
       - name: Install built package
         shell: bash
         run: |
-          pip install dist/*.whl
+          # Find and install the wheel file
+          wheel_file=$(python - << 'PYCODE'
+          import pathlib
+          
+          dist = pathlib.Path("dist")
+          wheels = sorted(dist.glob("*.whl"))
+          if len(wheels) != 1:
+              raise SystemExit(f"Expected exactly one wheel in {dist}, found {len(wheels)}: " +
+                               ", ".join(str(w) for w in wheels))
+          print(wheels[0])
+          PYCODE
+          )
+          pip install "$wheel_file"
       
       - name: Verify installation
         run: |
@@ -58,7 +70,6 @@ jobs:
       - name: Test imports
         run: |
           python -c "import os; import sys; print('Basic imports work')"
-        continue-on-error: true
   
   package-quality:
     runs-on: ubuntu-latest

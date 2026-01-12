@@ -73,8 +73,12 @@ jobs:
           # Generate checksums for release archives
           sha256sum cybersec-terminal-v${VERSION}.tar.gz > cybersec-terminal-v${VERSION}.tar.gz.sha256
           sha256sum cybersec-terminal-v${VERSION}.zip > cybersec-terminal-v${VERSION}.zip.sha256
-          # Generate checksums for Python packages using wildcards to handle any wheel naming
-          sha256sum cybersec_terminal-${VERSION}*.whl > cybersec_terminal-${VERSION}-py3-none-any.whl.sha256
+          # Generate checksums for Python wheel packages; handle any wheel naming
+          for WHEEL in cybersec_terminal-${VERSION}*.whl; do
+            [ -e "$WHEEL" ] || continue
+            sha256sum "$WHEEL" > "${WHEEL}.sha256"
+          done
+          # Generate checksum for source distribution
           sha256sum cybersec_terminal-${VERSION}.tar.gz > cybersec_terminal-${VERSION}.tar.gz.sha256
       
       - name: Create or update git tag
@@ -96,7 +100,7 @@ jobs:
             cp "RELEASE_NOTES_v${VERSION}.md" dist/release_notes.md
           else
             # Generate basic release notes
-            cat > dist/release_notes.md << 'EOF'
+            cat > dist/release_notes.md << EOF
           # CyberSec Terminal v${{ steps.version.outputs.version }}
           
           ## Release Assets
@@ -109,7 +113,7 @@ jobs:
           ## Installation
           
           ### From Release Archive
-          ```bash
+          \`\`\`bash
           # Linux/macOS
           tar -xzf cybersec-terminal-v${{ steps.version.outputs.version }}.tar.gz
           cd cybersec-terminal-v${{ steps.version.outputs.version }}
@@ -118,12 +122,12 @@ jobs:
           # Windows
           # Extract cybersec-terminal-v${{ steps.version.outputs.version }}.zip
           # Run install.bat
-          ```
+          \`\`\`
           
           ### From PyPI
-          ```bash
+          \`\`\`bash
           pip install cybersec-terminal
-          ```
+          \`\`\`
           
           ## Features
           
@@ -149,8 +153,8 @@ jobs:
             dist/cybersec-terminal-v${{ steps.version.outputs.version }}.tar.gz.sha256
             dist/cybersec-terminal-v${{ steps.version.outputs.version }}.zip
             dist/cybersec-terminal-v${{ steps.version.outputs.version }}.zip.sha256
-            dist/cybersec_terminal-${{ steps.version.outputs.version }}-py3-none-any.whl
-            dist/cybersec_terminal-${{ steps.version.outputs.version }}-py3-none-any.whl.sha256
+            dist/cybersec_terminal-${{ steps.version.outputs.version }}-*.whl
+            dist/cybersec_terminal-${{ steps.version.outputs.version }}-*.whl.sha256
             dist/cybersec_terminal-${{ steps.version.outputs.version }}.tar.gz
             dist/cybersec_terminal-${{ steps.version.outputs.version }}.tar.gz.sha256
           draft: false
