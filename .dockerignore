@@ -1,0 +1,83 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# Documentation builds
+docs/_build/
+site/
+
+# CI/CD artifacts
+.tox/
+.nox/
+*.log
+
+# Temporary files
+*.bak
+*.tmp
+*.temp
+/tmp/
+
+# Build artifacts
+*.tar.gz
+*.zip
+checksums.txt
+
+# Backups
+*.backup
+pyproject.toml.backup
+
+# Release files
+RELEASE_*.md
+REDUNDANCY_*.md
+SECURITY_PATCH_*.md
+USER_INTERFACE_STATUS.md
+RELEASE_SUMMARY.md
+
+# Local data
+data/
+*.db
+*.sqlite

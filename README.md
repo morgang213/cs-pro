@@ -1,5 +1,11 @@
 # CyberSec Analyst Tool
 
+[![CI Pipeline](https://github.com/morgang213/cs-pro/workflows/CI%20Pipeline/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/ci.yml)
+[![Release](https://github.com/morgang213/cs-pro/workflows/Release%20and%20Deploy/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/deploy.yml)
+[![Security Audit](https://github.com/morgang213/cs-pro/workflows/Dependency%20and%20Security%20Audit/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/security-audit.yml)
+[![Docker](https://github.com/morgang213/cs-pro/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/docker.yml)
+[![Code Quality](https://github.com/morgang213/cs-pro/workflows/Code%20Quality%20and%20Documentation/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/code-quality.yml)
+
 A comprehensive cybersecurity analysis and assessment platform with a **modern web-based user interface** built with Streamlit, providing a suite of security tools for network scanning, vulnerability assessment, password analysis, and threat intelligence.
 
 ## 🌐 Web-Based User Interface
@@ -254,6 +260,70 @@ Set these as environment variables to enable enhanced features.
 - Comprehensive security reports
 - Multiple export formats
 - Template-based reporting
+
+## 🐳 Deployment
+
+### Docker Deployment
+
+#### Using Pre-built Images
+```bash
+# Pull from GitHub Container Registry
+docker pull ghcr.io/morgang213/cs-pro:latest
+
+# Run container
+docker run -d -p 5000:5000 ghcr.io/morgang213/cs-pro:latest
+
+# Access at http://localhost:5000
+```
+
+#### Using Docker Compose
+```bash
+# Clone repository
+git clone https://github.com/morgang213/cs-pro.git
+cd cs-pro
+
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+#### Building Custom Image
+```bash
+# Build image
+docker build -t cybersec-terminal:custom .
+
+# Run with custom configuration
+docker run -d \
+  -p 5000:5000 \
+  -e IPINFO_TOKEN=your_token \
+  -e VIRUSTOTAL_API_KEY=your_key \
+  cybersec-terminal:custom
+```
+
+### CI/CD Workflows
+
+This repository includes comprehensive GitHub Actions workflows for automated testing, building, and deployment:
+
+- **CI Pipeline**: Automated testing on multiple Python versions
+- **Release & Deploy**: Automatic release creation when tags are pushed
+- **Security Audit**: Weekly dependency and security scans
+- **Code Quality**: Automated code quality checks
+- **Docker Build**: Multi-platform Docker image builds
+
+**Creating a Release:**
+```bash
+# Update version and create tag
+git tag -a v2.0.1 -m "Release version 2.0.1"
+git push origin v2.0.1
+# Workflow automatically creates GitHub release with packages
+```
+
+For detailed workflow documentation, see [.github/WORKFLOWS.md](.github/WORKFLOWS.md)
 
 ## Configuration
 
