@@ -34,7 +34,6 @@ setup(
         "Topic :: System :: Systems Administration",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -44,7 +43,7 @@ setup(
         "Environment :: Web Environment",
         "Environment :: Console",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "flask>=2.3.0",
         "colorama>=0.4.6",
