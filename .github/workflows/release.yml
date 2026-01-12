@@ -70,9 +70,11 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           cd dist
+          # Generate checksums for release archives
           sha256sum cybersec-terminal-v${VERSION}.tar.gz > cybersec-terminal-v${VERSION}.tar.gz.sha256
           sha256sum cybersec-terminal-v${VERSION}.zip > cybersec-terminal-v${VERSION}.zip.sha256
-          sha256sum cybersec_terminal-${VERSION}-py3-none-any.whl > cybersec_terminal-${VERSION}-py3-none-any.whl.sha256
+          # Generate checksums for Python packages using wildcards to handle any wheel naming
+          sha256sum cybersec_terminal-${VERSION}*.whl > cybersec_terminal-${VERSION}-py3-none-any.whl.sha256
           sha256sum cybersec_terminal-${VERSION}.tar.gz > cybersec_terminal-${VERSION}.tar.gz.sha256
       
       - name: Create or update git tag

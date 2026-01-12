@@ -31,8 +31,12 @@ jobs:
       
       - name: Install package dependencies
         run: |
-          pip install -r requirements.txt
-        continue-on-error: true
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            echo "No requirements.txt found, skipping dependency installation"
+          fi
+        shell: bash
       
       - name: Build package
         run: |
