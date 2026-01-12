@@ -1,0 +1,178 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 2.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel build twine
+      
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
+      
+      - name: Clean previous builds
+        run: |
+          rm -rf dist/ build/ *.egg-info
+      
+      - name: Build Python packages
+        run: |
+          python -m build
+      
+      - name: Create release archives
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Create temporary directory for release content
+          mkdir -p release_temp
+          
+          # Copy all necessary files excluding certain directories
+          rsync -av --exclude='.git' \
+                    --exclude='dist' \
+                    --exclude='build' \
+                    --exclude='*.egg-info' \
+                    --exclude='__pycache__' \
+                    --exclude='*.pyc' \
+                    --exclude='.github' \
+                    --exclude='release_temp' \
+                    . release_temp/
+          
+          # Create archives
+          cd release_temp
+          tar -czf ../dist/cybersec-terminal-v${VERSION}.tar.gz .
+          zip -r ../dist/cybersec-terminal-v${VERSION}.zip .
+          cd ..
+          
+          # Clean up
+          rm -rf release_temp
+      
+      - name: Generate checksums
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          cd dist
+          sha256sum cybersec-terminal-v${VERSION}.tar.gz > cybersec-terminal-v${VERSION}.tar.gz.sha256
+          sha256sum cybersec-terminal-v${VERSION}.zip > cybersec-terminal-v${VERSION}.zip.sha256
+          sha256sum cybersec_terminal-${VERSION}-py3-none-any.whl > cybersec_terminal-${VERSION}-py3-none-any.whl.sha256
+          sha256sum cybersec_terminal-${VERSION}.tar.gz > cybersec_terminal-${VERSION}.tar.gz.sha256
+      
+      - name: Create or update git tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG}" -m "Release ${TAG}"
+          git push origin "${TAG}" || echo "Tag already exists"
+      
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          # Check if release notes file exists
+          if [ -f "RELEASE_NOTES_v${VERSION}.md" ]; then
+            cp "RELEASE_NOTES_v${VERSION}.md" dist/release_notes.md
+          else
+            # Generate basic release notes
+            cat > dist/release_notes.md << 'EOF'
+          # CyberSec Terminal v${{ steps.version.outputs.version }}
+          
+          ## Release Assets
+          
+          - **cybersec-terminal-v${{ steps.version.outputs.version }}.tar.gz** - Full release package for Linux/macOS
+          - **cybersec-terminal-v${{ steps.version.outputs.version }}.zip** - Full release package for Windows
+          - **cybersec_terminal-${{ steps.version.outputs.version }}-py3-none-any.whl** - Python wheel package
+          - **cybersec_terminal-${{ steps.version.outputs.version }}.tar.gz** - Python source distribution
+          
+          ## Installation
+          
+          ### From Release Archive
+          ```bash
+          # Linux/macOS
+          tar -xzf cybersec-terminal-v${{ steps.version.outputs.version }}.tar.gz
+          cd cybersec-terminal-v${{ steps.version.outputs.version }}
+          ./install.sh
+          
+          # Windows
+          # Extract cybersec-terminal-v${{ steps.version.outputs.version }}.zip
+          # Run install.bat
+          ```
+          
+          ### From PyPI
+          ```bash
+          pip install cybersec-terminal
+          ```
+          
+          ## Features
+          
+          - Professional cybersecurity analysis platform
+          - Web-based terminal interface
+          - 19+ security tools included
+          - Cross-platform support (Windows, macOS, Linux)
+          
+          ## Documentation
+          
+          See [README.md](https://github.com/${{ github.repository }}/blob/main/README.md) for full documentation.
+          EOF
+          fi
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: CyberSec Terminal ${{ steps.version.outputs.tag }}
+          body_path: dist/release_notes.md
+          files: |
+            dist/cybersec-terminal-v${{ steps.version.outputs.version }}.tar.gz
+            dist/cybersec-terminal-v${{ steps.version.outputs.version }}.tar.gz.sha256
+            dist/cybersec-terminal-v${{ steps.version.outputs.version }}.zip
+            dist/cybersec-terminal-v${{ steps.version.outputs.version }}.zip.sha256
+            dist/cybersec_terminal-${{ steps.version.outputs.version }}-py3-none-any.whl
+            dist/cybersec_terminal-${{ steps.version.outputs.version }}-py3-none-any.whl.sha256
+            dist/cybersec_terminal-${{ steps.version.outputs.version }}.tar.gz
+            dist/cybersec_terminal-${{ steps.version.outputs.version }}.tar.gz.sha256
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Display release information
+        run: |
+          echo "✅ Release created successfully!"
+          echo "Version: ${{ steps.version.outputs.version }}"
+          echo "Tag: ${{ steps.version.outputs.tag }}"
+          echo "Release URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }}"
