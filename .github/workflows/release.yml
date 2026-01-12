@@ -57,28 +57,14 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           
-          # Create temporary directory for release content
-          mkdir -p release_temp
+          # Use git archive to create clean release archives
+          ARCHIVE_NAME="cybersec-terminal-v${VERSION}"
           
-          # Copy all necessary files excluding certain directories
-          rsync -av --exclude='.git' \
-                    --exclude='dist' \
-                    --exclude='build' \
-                    --exclude='*.egg-info' \
-                    --exclude='__pycache__' \
-                    --exclude='*.pyc' \
-                    --exclude='.github' \
-                    --exclude='release_temp' \
-                    . release_temp/
+          # Create tar.gz archive
+          git archive --format=tar.gz --prefix="${ARCHIVE_NAME}/" -o "dist/${ARCHIVE_NAME}.tar.gz" HEAD
           
-          # Create archives
-          cd release_temp
-          tar -czf ../dist/cybersec-terminal-v${VERSION}.tar.gz .
-          zip -r ../dist/cybersec-terminal-v${VERSION}.zip .
-          cd ..
-          
-          # Clean up
-          rm -rf release_temp
+          # Create zip archive
+          git archive --format=zip --prefix="${ARCHIVE_NAME}/" -o "dist/${ARCHIVE_NAME}.zip" HEAD
       
       - name: Generate checksums
         run: |
