@@ -9,13 +9,14 @@ import sys
 import json
 import uuid
 import time
+import secrets
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, session
 import threading
 import webbrowser
 
 app = Flask(__name__)
-app.secret_key = 'cybersec_terminal_key_' + str(uuid.uuid4())
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', secrets.token_hex(32))
 
 class TerminalSession:
     def __init__(self):
@@ -470,4 +471,6 @@ if __name__ == '__main__':
     print("💻 Opening browser at http://127.0.0.1:5000")
     print("🔒 Press Ctrl+C to stop the server")
     
-    app.run(debug=False, host='127.0.0.1', port=5000)
+    app.run(debug=False,
+            host=os.environ.get('HOST', '127.0.0.1'),
+            port=int(os.environ.get('PORT', 5000)))
