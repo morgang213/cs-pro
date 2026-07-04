@@ -14,10 +14,9 @@ try:
     from colorama import init, Fore, Back, Style
     init()
 except ImportError:
-    print("Installing required packages...")
-    os.system("pip install colorama")
-    from colorama import init, Fore, Back, Style
-    init()
+    print("Missing required package: colorama")
+    print("Install dependencies with: pip install -r requirements.txt")
+    sys.exit(1)
 
 class SimpleTerminalUI:
     def __init__(self):

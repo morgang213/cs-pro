@@ -55,7 +55,7 @@ test_package_install() {
     cd "$TEST_DIR"
     
     # Copy installation files
-    cp -r "/Users/morgangamble/Documents/Coding projects/cs-pro"/* .
+    cp -r "$(cd "$(dirname "$0")" && pwd)"/* .
     
     # Run installation
     if ./install.sh &> install.log; then

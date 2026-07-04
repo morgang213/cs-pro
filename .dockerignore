@@ -81,3 +81,22 @@ RELEASE_SUMMARY.md
 data/
 *.db
 *.sqlite
+
+# Documentation (not needed in Docker image)
+*.md
+!README.md
+CONTRIBUTING.md
+DEPLOYMENT_CHECKLIST.md
+DISTRIBUTION.md
+GITHUB_DEPLOYMENT_GUIDE.md
+TAG_PUSH_INSTRUCTIONS.md
+TERMINAL_GUIDE.md
+UI_GUIDE.md
+WORKFLOW_IMPLEMENTATION_COMPLETE.md
+
+# Scripts not needed in image
+install.bat
+install.sh
+test_install.sh
+build.sh
+uv.lock
