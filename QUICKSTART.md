@@ -29,10 +29,14 @@ Open http://127.0.0.1:5000 in your browser
 | `menu` | Show security tools | `menu` |
 | `netscan` | Network scanning | `netscan 192.168.1.1` |
 | `vulnscan` | Vulnerability test | `vulnscan https://example.com` |
+| `tlscheck` | TLS posture analysis | `tlscheck example.com 443` |
 | `passcheck` | Password strength | `passcheck "MyPass123!"` |
 | `hash` | Generate hashes | `hash sha256 "text"` |
 | `ipinfo` | IP analysis | `ipinfo 8.8.8.8` |
 | `domain` | Domain analysis | `domain google.com` |
+| `email` | Email security analysis | `email security@example.com` |
+| `logs` | Log threat analysis | `logs --type ssh "failed password"` |
+| `report` | Generate security report | `report comprehensive` |
 | `clear` | Clear screen | `clear` |
 
 ---
@@ -49,9 +53,14 @@ Open http://127.0.0.1:5000 in your browser
 - Traditional command-line
 - Lightweight and fast
 - Pure terminal experience
-- Run: `cybersec-cli` or `python app.py`
+- Run: `cybersec-terminal` or `python app.py`
 
-### **3. Launcher**
+### **3. Automation CLI**
+- Scriptable scanner-first command mode
+- JSON output for pipelines and integrations
+- Run: `python cli.py --help`
+
+### **4. Launcher**
 - Choose your preferred interface
 - Easy switching between modes
 - Run: `cybersec` or `python launch_terminal.py`
@@ -111,7 +120,7 @@ Open http://127.0.0.1:5000 in your browser
 ### **Educational Purpose**
 - This tool is for learning and authorized security testing
 - Not intended for malicious activities
-- Results are demonstrations and simulations
+- Use only with explicit authorization on approved targets
 
 ### **Best Practices**
 - Always obtain proper authorization before testing
@@ -137,7 +146,7 @@ rm -rf venv && ./install.sh
 
 ### **Web Terminal Not Loading**
 1. Check if port 5000 is available
-2. Try different port: `python terminal_web.py --port 8080`
+2. Try different port: `PORT=8080 python terminal_web.py`
 3. Check firewall settings
 4. Restart the application
 

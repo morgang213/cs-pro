@@ -146,6 +146,9 @@ python terminal_web.py
 # CLI Terminal
 python app.py
 
+# Automation CLI
+python cli.py --help
+
 # Launcher (choose interface)
 python launch_terminal.py
 ```
@@ -161,8 +164,14 @@ python launch_terminal.py
 - `menu` - Show security tools
 - `netscan <target>` - Network scanning
 - `vulnscan <url>` - Vulnerability assessment
+- `tlscheck <host> [port]` - TLS analysis
 - `passcheck <password>` - Password analysis
 - `hash <algorithm> <text>` - Hash generation
+- `ipinfo <ip>` - IP intelligence
+- `domain <domain>` - Domain analysis
+- `email <address> [--content <text>]` - Email risk analysis
+- `logs [--file <path>] [--type <parser>] <log text>` - Log threat analysis
+- `report [vulnerability|network|comprehensive]` - Report generation
 - `help` - Show all commands
 
 ## Security Notice

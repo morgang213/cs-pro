@@ -4,510 +4,693 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberSec Terminal</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>C</text></svg>">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --bg-900: #050a07;
+            --bg-850: #0a140f;
+            --bg-800: #0f1f17;
+            --surface-700: rgba(12, 28, 20, 0.86);
+            --surface-600: rgba(9, 21, 16, 0.95);
+            --line-main: rgba(0, 255, 145, 0.45);
+            --line-soft: rgba(0, 255, 145, 0.16);
+            --text-main: #d5ffe9;
+            --text-dim: #84c9a6;
+            --accent-main: #00ff91;
+            --accent-cyan: #5ed9ff;
+            --accent-warn: #ffb84c;
+            --accent-danger: #ff6565;
+            --accent-strong: #3fffb6;
+            --shadow-main: 0 24px 80px rgba(0, 0, 0, 0.45);
+            --radius-main: 14px;
+            --radius-soft: 10px;
+            --trans-fast: 140ms ease;
+            --trans-normal: 220ms ease;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        html,
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            color: #00ff41;
+            height: 100%;
+        }
+
+        body {
+            color: var(--text-main);
             font-family: 'JetBrains Mono', 'Courier New', monospace;
-            height: 100vh;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(0, 255, 145, 0.09) 0%, transparent 36%),
+                radial-gradient(circle at 85% 10%, rgba(94, 217, 255, 0.1) 0%, transparent 34%),
+                radial-gradient(circle at 80% 90%, rgba(0, 255, 145, 0.08) 0%, transparent 32%),
+                linear-gradient(130deg, var(--bg-900) 0%, var(--bg-850) 52%, var(--bg-800) 100%);
             overflow: hidden;
             position: relative;
         }
 
-        /* Matrix rain effect background */
-        .matrix-bg {
+        .grid-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             pointer-events: none;
-            z-index: -1;
-            opacity: 0.05;
+            background-image:
+                linear-gradient(rgba(0, 255, 145, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 145, 0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+            -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+            mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+            z-index: 0;
         }
 
-        .matrix-bg::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 255, 65, 0.03) 2px,
-                    rgba(0, 255, 65, 0.03) 4px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 255, 65, 0.03) 2px,
-                    rgba(0, 255, 65, 0.03) 4px
-                );
-            animation: matrix-scroll 20s linear infinite;
-        }
-
-        @keyframes matrix-scroll {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(20px); }
-        }
-
-        .terminal-container {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.95);
-            border: 1px solid #00ff41;
-            box-shadow: 
-                0 0 20px rgba(0, 255, 65, 0.3),
-                inset 0 0 20px rgba(0, 255, 65, 0.1);
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            height: calc(100% - 20px);
+            margin: 10px;
+            display: grid;
+            grid-template-rows: auto auto auto 1fr auto;
+            border: 1px solid var(--line-main);
+            border-radius: var(--radius-main);
+            background: linear-gradient(180deg, rgba(8, 23, 16, 0.94) 0%, rgba(5, 14, 10, 0.97) 100%);
+            box-shadow: var(--shadow-main), inset 0 0 0 1px rgba(0, 255, 145, 0.08);
+            overflow: hidden;
         }
 
         .terminal-header {
-            background: linear-gradient(90deg, #003300 0%, #006600 50%, #003300 100%);
-            padding: 8px 15px;
-            border-bottom: 1px solid #00ff41;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0, 255, 65, 0.2);
+            gap: 16px;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--line-main);
+            background: linear-gradient(90deg, rgba(11, 35, 24, 0.96) 0%, rgba(10, 25, 18, 0.96) 100%);
         }
 
-        .terminal-title {
-            font-weight: bold;
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .brand-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .brand-icon {
+            font-size: 18px;
+        }
+
+        .terminal-name {
             font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .terminal-subtitle {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 0.03em;
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line-soft);
+            background: rgba(0, 255, 145, 0.08);
+            color: var(--accent-strong);
+        }
+
+        .status-pill.muted {
+            color: var(--text-dim);
+            background: rgba(94, 217, 255, 0.08);
+            border-color: rgba(94, 217, 255, 0.2);
+        }
+
+        .window-controls {
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-left: 4px;
         }
 
-        .terminal-controls {
+        .control-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            cursor: pointer;
+            transition: transform var(--trans-fast), filter var(--trans-fast);
+        }
+
+        .control-dot:hover {
+            transform: scale(1.08);
+            filter: brightness(1.12);
+        }
+
+        .control-dot.close { background: #ff6f6f; }
+        .control-dot.minimize { background: #ffcb66; }
+        .control-dot.maximize { background: #61e08c; }
+
+        .command-dock {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--line-soft);
+            background: linear-gradient(180deg, rgba(8, 23, 16, 0.74) 0%, rgba(7, 18, 13, 0.62) 100%);
+        }
+
+        .dock-label {
+            font-size: 11px;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .chip-grid {
             display: flex;
+            flex-wrap: wrap;
             gap: 8px;
         }
 
-        .control-btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+        .command-chip {
+            border: 1px solid rgba(94, 217, 255, 0.32);
+            background: rgba(94, 217, 255, 0.1);
+            color: var(--accent-cyan);
+            border-radius: 999px;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 11px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background var(--trans-fast), border-color var(--trans-fast), transform var(--trans-fast);
         }
 
-        .control-btn.close { background: #ff5555; }
-        .control-btn.minimize { background: #ffb86c; }
-        .control-btn.maximize { background: #50fa7b; }
+        .command-chip:hover {
+            background: rgba(94, 217, 255, 0.2);
+            border-color: rgba(94, 217, 255, 0.54);
+            transform: translateY(-1px);
+        }
 
-        .control-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 5px currentColor;
+        .status-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--line-soft);
+            background: rgba(5, 14, 10, 0.68);
+            color: var(--text-dim);
+            font-size: 11px;
+        }
+
+        .status-item {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .terminal-body {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.8);
-            position: relative;
+            overflow: auto;
+            padding: 16px;
+            background:
+                linear-gradient(180deg, rgba(3, 10, 7, 0.94) 0%, rgba(4, 13, 9, 0.98) 100%);
         }
 
         .terminal-output {
-            min-height: calc(100vh - 150px);
-            padding-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 100%;
+            padding-bottom: 10px;
+        }
+
+        .welcome-card {
+            border: 1px solid var(--line-main);
+            border-radius: var(--radius-soft);
+            background: linear-gradient(180deg, rgba(0, 255, 145, 0.08) 0%, rgba(0, 255, 145, 0.03) 100%);
+            padding: 14px;
+            color: var(--accent-strong);
+            font-size: 13px;
+            line-height: 1.52;
+        }
+
+        .welcome-card strong {
+            color: #b8ffdc;
         }
 
         .terminal-line {
-            margin-bottom: 8px;
-            line-height: 1.4;
+            border: 1px solid var(--line-soft);
+            border-radius: 8px;
+            background: rgba(11, 25, 18, 0.66);
+            padding: 10px 12px;
+            line-height: 1.46;
             white-space: pre-wrap;
-            word-wrap: break-word;
+            word-break: break-word;
         }
 
-        .prompt {
-            color: #50fa7b;
-            font-weight: bold;
+        .command-line {
+            border-left: 3px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(18, 43, 31, 0.72);
         }
 
-        .command {
-            color: #8be9fd;
-            margin-left: 8px;
+        .output-line {
+            border-left: 3px solid rgba(0, 255, 145, 0.34);
+            color: var(--text-main);
         }
 
-        .output {
-            color: #f8f8f2;
-            margin-left: 0;
-            padding: 4px 0;
+        .loading-line {
+            border-left: 3px solid var(--accent-warn);
+            color: var(--accent-warn);
+            background: rgba(45, 28, 5, 0.45);
         }
 
-        .input-container {
-            position: sticky;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 15px 20px;
-            border-top: 1px solid #00ff41;
+        .input-bar {
             display: flex;
             align-items: center;
-            backdrop-filter: blur(10px);
+            gap: 10px;
+            padding: 12px 14px;
+            border-top: 1px solid var(--line-main);
+            background: linear-gradient(180deg, rgba(8, 23, 16, 0.95) 0%, rgba(7, 17, 13, 0.98) 100%);
         }
 
         .current-prompt {
-            color: #50fa7b;
-            font-weight: bold;
-            margin-right: 8px;
+            color: var(--accent-strong);
+            font-weight: 700;
+            font-size: 12px;
             white-space: nowrap;
         }
 
         .command-input {
             flex: 1;
-            background: transparent;
-            border: none;
-            color: #8be9fd;
+            border: 1px solid rgba(0, 255, 145, 0.32);
+            background: rgba(4, 12, 9, 0.92);
+            color: var(--text-main);
             font-family: inherit;
-            font-size: 14px;
+            font-size: 13px;
+            padding: 10px 11px;
+            border-radius: 8px;
             outline: none;
-            caret-color: #00ff41;
+            transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+        }
+
+        .command-input:focus {
+            border-color: rgba(94, 217, 255, 0.66);
+            box-shadow: 0 0 0 3px rgba(94, 217, 255, 0.16);
         }
 
         .command-input::placeholder {
-            color: #6272a4;
+            color: #6ca98a;
         }
 
-        /* Styling for different output types */
+        .run-btn {
+            border: 1px solid rgba(0, 255, 145, 0.45);
+            background: rgba(0, 255, 145, 0.14);
+            color: var(--accent-strong);
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background var(--trans-fast), border-color var(--trans-fast), transform var(--trans-fast);
+        }
+
+        .run-btn:hover {
+            background: rgba(0, 255, 145, 0.23);
+            border-color: rgba(0, 255, 145, 0.72);
+            transform: translateY(-1px);
+        }
+
+        .run-btn:active {
+            transform: translateY(0);
+        }
+
+        .hint-row {
+            padding: 0 16px 12px;
+            color: var(--text-dim);
+            font-size: 11px;
+        }
+
         .help-header {
-            color: #ff79c6;
-            font-weight: bold;
-            font-size: 16px;
+            color: #b8ffdc;
+            font-weight: 700;
+            font-size: 14px;
             text-decoration: underline;
         }
 
         .help-section {
-            color: #ffb86c;
-            font-weight: bold;
-            margin-top: 12px;
-            margin-bottom: 4px;
+            color: var(--accent-warn);
+            font-weight: 700;
+            margin-top: 10px;
+            margin-bottom: 2px;
         }
 
         .help-footer {
-            color: #6272a4;
+            color: var(--text-dim);
             font-style: italic;
-            margin-top: 12px;
+            margin-top: 10px;
         }
 
-        .menu-header {
-            color: #ff79c6;
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
+        .menu-header,
+        .tool-header,
+        .status-header {
+            color: #b8ffdc;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 6px;
             display: block;
-            margin-bottom: 8px;
         }
 
-        .menu-item {
-            color: #8be9fd;
-            font-weight: bold;
+        .menu-item,
+        .status-info,
+        .vuln-low,
+        .hash-result {
+            color: var(--accent-cyan);
         }
 
-        .tool-name {
-            color: #50fa7b;
-            font-weight: bold;
+        .tool-name,
+        .status-good,
+        .scan-complete,
+        .strength-strong {
+            color: var(--accent-strong);
         }
 
-        .tool-header {
-            color: #ff79c6;
-            font-weight: bold;
-            font-size: 16px;
+        .results-header,
+        .vuln-medium,
+        .strength-moderate {
+            color: var(--accent-warn);
+            font-weight: 700;
+            margin: 8px 0 4px;
             display: block;
-            margin-bottom: 8px;
+        }
+
+        .vuln-high,
+        .error,
+        .strength-weak {
+            color: var(--accent-danger);
+            font-weight: 700;
         }
 
         .scan-progress {
-            color: #8be9fd;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.7; }
-            50% { opacity: 1; }
-        }
-
-        .results-header {
-            color: #ffb86c;
-            font-weight: bold;
-            margin: 12px 0 8px 0;
-            display: block;
-        }
-
-        .port-open {
-            color: #50fa7b;
-            font-weight: bold;
-        }
-
-        .port-filtered {
-            color: #ffb86c;
-            font-weight: bold;
-        }
-
-        .scan-complete {
-            color: #50fa7b;
-            font-weight: bold;
-        }
-
-        .vuln-high {
-            color: #ff5555;
-            font-weight: bold;
-        }
-
-        .vuln-medium {
-            color: #ffb86c;
-            font-weight: bold;
-        }
-
-        .vuln-low {
-            color: #8be9fd;
-            font-weight: bold;
-        }
-
-        .vuln-warning {
-            color: #ff79c6;
-            font-weight: bold;
-        }
-
-        .strength-weak {
-            color: #ff5555;
-            font-weight: bold;
-        }
-
-        .strength-moderate {
-            color: #ffb86c;
-            font-weight: bold;
-        }
-
-        .strength-strong {
-            color: #50fa7b;
-            font-weight: bold;
+            color: var(--accent-cyan);
+            animation: pulse 1.8s ease-in-out infinite;
         }
 
         .hash-result {
-            color: #8be9fd;
-            font-weight: bold;
             word-break: break-all;
-            background: rgba(139, 233, 253, 0.1);
-            padding: 8px;
-            border-radius: 4px;
+            background: rgba(94, 217, 255, 0.08);
+            border-radius: 6px;
+            padding: 7px;
             display: block;
-            margin-top: 8px;
+            margin-top: 7px;
         }
 
-        .status-header {
-            color: #ff79c6;
-            font-weight: bold;
-            font-size: 16px;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .status-good {
-            color: #50fa7b;
-        }
-
-        .status-info {
-            color: #8be9fd;
-        }
-
-        .error {
-            color: #ff5555;
-            font-weight: bold;
-        }
-
-        /* Scrollbar styling */
-        .terminal-body::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .terminal-body::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .terminal-body::-webkit-scrollbar-thumb {
-            background: #00ff41;
-            border-radius: 4px;
-        }
-
-        .terminal-body::-webkit-scrollbar-thumb:hover {
-            background: #50fa7b;
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-        }
-
-        .loading::after {
+        .loading-caret::after {
             content: '|';
-            animation: blink 1s infinite;
+            margin-left: 6px;
+            animation: blink 1s steps(2, start) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.62; }
+            50% { opacity: 1; }
         }
 
         @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
         }
 
-        /* Welcome message styling */
-        .welcome-banner {
-            color: #50fa7b;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 20px;
-            border: 1px solid #00ff41;
-            background: rgba(0, 255, 65, 0.05);
-            border-radius: 8px;
+        .terminal-body::-webkit-scrollbar {
+            width: 9px;
         }
 
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .terminal-container {
-                height: 100vh;
+        .terminal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 145, 0.46);
+            border-radius: 999px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 145, 0.66);
+        }
+
+        @media (max-width: 980px) {
+            .app-shell {
+                margin: 0;
+                height: 100%;
+                border-radius: 0;
+                border-left: 0;
+                border-right: 0;
             }
-            
-            .terminal-body {
-                padding: 10px;
+
+            .terminal-header {
+                padding: 12px 12px;
             }
-            
-            .input-container {
-                padding: 10px;
+
+            .command-dock,
+            .status-strip,
+            .terminal-body,
+            .hint-row {
+                padding-left: 12px;
+                padding-right: 12px;
             }
-            
+
+            .input-bar {
+                padding: 10px 12px;
+            }
+
+            .header-meta {
+                gap: 6px;
+            }
+
+            .status-pill {
+                padding: 4px 8px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .terminal-name {
+                font-size: 13px;
+            }
+
+            .terminal-subtitle {
+                display: none;
+            }
+
             .current-prompt {
-                font-size: 12px;
+                display: none;
             }
-            
+
             .command-input {
                 font-size: 12px;
+            }
+
+            .run-btn {
+                padding: 9px 10px;
+                min-width: 58px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="matrix-bg"></div>
-    <div class="terminal-container">
-        <div class="terminal-header">
-            <div class="terminal-title">
-                🛡️ CyberSec Terminal v2.0 - Professional Security Analysis
+    <div class="grid-overlay" aria-hidden="true"></div>
+    <div class="app-shell">
+        <header class="terminal-header">
+            <div class="header-title">
+                <div class="brand-line">
+                    <span class="brand-icon">[CS]</span>
+                    <span class="terminal-name">CyberSec Terminal v2.1</span>
+                </div>
+                <p class="terminal-subtitle">Professional Security Operations Console</p>
             </div>
-            <div class="terminal-controls">
-                <div class="control-btn minimize"></div>
-                <div class="control-btn maximize"></div>
-                <div class="control-btn close" onclick="if(confirm('Close terminal?')) window.close()"></div>
+            <div class="header-meta">
+                <span class="status-pill">Secure Session</span>
+                <span class="status-pill muted" id="clock-pill">--:--:--</span>
+                <div class="window-controls" aria-hidden="true">
+                    <span class="control-dot minimize"></span>
+                    <span class="control-dot maximize"></span>
+                    <span class="control-dot close" title="Close" onclick="if(confirm('Close terminal tab?')) window.close()"></span>
+                </div>
             </div>
-        </div>
-        
-        <div class="terminal-body">
+        </header>
+
+        <section class="command-dock" aria-label="Quick commands">
+            <div class="dock-label">Quick Commands</div>
+            <div class="chip-grid">
+                <button class="command-chip" data-command="menu">menu</button>
+                <button class="command-chip" data-command="status">status</button>
+                <button class="command-chip" data-command="netscan 127.0.0.1 quick">netscan local</button>
+                <button class="command-chip" data-command="vulnscan https://example.com web">vulnscan web</button>
+                <button class="command-chip" data-command="tlscheck example.com 443">tlscheck</button>
+                <button class="command-chip" data-command="report comprehensive --title &quot;Security Snapshot&quot;">report</button>
+            </div>
+        </section>
+
+        <section class="status-strip" aria-live="polite">
+            <span class="status-item" id="session-status">Runtime: Ready</span>
+            <span class="status-item" id="prompt-preview">Prompt: cybersec@security-terminal:~$</span>
+            <span class="status-item">Endpoint: /execute</span>
+        </section>
+
+        <main class="terminal-body" id="terminal-body">
             <div class="terminal-output" id="terminal-output">
-                <div class="welcome-banner">
-                    ╔═══════════════════════════════════════════════════════════════╗<br>
-                    ║                 CYBERSEC TERMINAL v2.0                       ║<br>
-                    ║              Professional Security Analysis                   ║<br>
-                    ║                                                               ║<br>
-                    ║  🌐 Network Analysis    🔍 Vulnerability Assessment          ║<br>
-                    ║  🔐 Password Security   📍 IP Intelligence                   ║<br>
-                    ║  🌍 Domain Analysis     📧 Email Security                    ║<br>
-                    ║  📊 Log Analysis        📋 Report Generation                 ║<br>
-                    ║                                                               ║<br>
-                    ║              Type 'help' for commands | 'menu' for tools     ║<br>
-                    ╚═══════════════════════════════════════════════════════════════╝
-                </div>
-                
-                <div class="terminal-line">
-                    <span class="output">Welcome to CyberSec Terminal! Type 'help' for available commands.</span>
+                <article class="welcome-card" id="welcome-card">
+<strong>CYBERSEC TERMINAL ACTIVE</strong>
+
+01 - Network Scanner       06 - Domain Analysis
+02 - Vulnerability Scan    07 - Email Security
+03 - Password Analyzer     08 - Log Analyzer
+04 - Hash Utilities        09 - Report Generator
+05 - IP Intelligence       10 - TLS Analyzer
+
+Type <strong>help</strong> for command reference or <strong>menu</strong> for module list.
+                </article>
+                <div class="terminal-line output-line">
+Welcome to CyberSec Terminal. All operations are for authorized testing only.
                 </div>
             </div>
-        </div>
-        
-        <div class="input-container">
+        </main>
+
+        <footer class="input-bar">
             <span class="current-prompt" id="prompt">cybersec@security-terminal:~$ </span>
-            <input 
-                type="text" 
-                class="command-input" 
-                id="command-input" 
+            <input
+                type="text"
+                class="command-input"
+                id="command-input"
                 placeholder="Enter command..."
                 autocomplete="off"
                 autofocus
+                list="command-hints"
+                spellcheck="false"
             >
-        </div>
+            <button class="run-btn" id="run-command-btn" type="button">Run</button>
+        </footer>
+
+        <div class="hint-row">Tips: <strong>Tab</strong> autocomplete, <strong>Arrow Up/Down</strong> history, <strong>Ctrl+L</strong> clear screen.</div>
     </div>
 
+    <datalist id="command-hints">
+        <option value="help"></option>
+        <option value="menu"></option>
+        <option value="status"></option>
+        <option value="netscan 127.0.0.1 quick"></option>
+        <option value="netscan 127.0.0.1 port 22,80,443"></option>
+        <option value="vulnscan https://example.com web --aggressive"></option>
+        <option value="tlscheck example.com 443"></option>
+        <option value="passcheck MySecurePass123!"></option>
+        <option value="hash sha256 hello-world"></option>
+        <option value="ipinfo 8.8.8.8"></option>
+        <option value="domain example.com"></option>
+        <option value="email security@example.com --content urgent verify account"></option>
+        <option value="logs --type ssh failed password for root from 203.0.113.9"></option>
+        <option value="report comprehensive --title Security Snapshot"></option>
+    </datalist>
+
     <script>
-        let commandHistory = [];
+        const commandHistory = [];
         let historyIndex = -1;
 
+        const terminalBody = document.getElementById('terminal-body');
         const terminalOutput = document.getElementById('terminal-output');
         const commandInput = document.getElementById('command-input');
-        const prompt = document.getElementById('prompt');
+        const runButton = document.getElementById('run-command-btn');
+        const promptEl = document.getElementById('prompt');
+        const sessionStatus = document.getElementById('session-status');
+        const promptPreview = document.getElementById('prompt-preview');
+        const clockPill = document.getElementById('clock-pill');
 
-        // Focus input when clicking anywhere
-        document.addEventListener('click', () => {
-            commandInput.focus();
-        });
+        const knownCommands = [
+            'help',
+            'menu',
+            'status',
+            'clear',
+            'netscan',
+            'vulnscan',
+            'tlscheck',
+            'passcheck',
+            'hash',
+            'ipinfo',
+            'domain',
+            'email',
+            'logs',
+            'report',
+            'whoami',
+            'pwd',
+            'date',
+            'uptime',
+            'exit'
+        ];
 
-        // Handle command input
-        commandInput.addEventListener('keydown', async (e) => {
-            if (e.key === 'Enter') {
-                const command = commandInput.value.trim();
-                
-                if (command) {
-                    // Add to history
-                    commandHistory.push(command);
-                    historyIndex = commandHistory.length;
-                    
-                    // Display command
-                    addTerminalLine(prompt.textContent + command, 'command');
-                    
-                    // Clear input
-                    commandInput.value = '';
-                    
-                    // Execute command
-                    await executeCommand(command);
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    commandInput.value = commandHistory[historyIndex];
-                }
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIndex < commandHistory.length - 1) {
-                    historyIndex++;
-                    commandInput.value = commandHistory[historyIndex];
-                } else {
-                    historyIndex = commandHistory.length;
-                    commandInput.value = '';
-                }
-            } else if (e.key === 'Tab') {
-                e.preventDefault();
-                // Tab completion could be implemented here
-                const commands = ['help', 'menu', 'clear', 'status', 'netscan', 'vulnscan', 'passcheck', 'hash', 'ipinfo', 'domain', 'email', 'logs', 'report'];
-                const currentInput = commandInput.value.toLowerCase();
-                const matches = commands.filter(cmd => cmd.startsWith(currentInput));
-                if (matches.length === 1) {
-                    commandInput.value = matches[0] + ' ';
-                }
+        function updateClock() {
+            const now = new Date();
+            clockPill.textContent = now.toLocaleTimeString([], { hour12: false });
+        }
+
+        function scrollToBottom() {
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function appendCommandLine(commandText) {
+            const line = document.createElement('div');
+            line.className = 'terminal-line command-line';
+            line.textContent = `${promptEl.textContent}${commandText}`;
+            terminalOutput.appendChild(line);
+            return line;
+        }
+
+        function appendOutputLine(content, className = 'output-line', allowHtml = true) {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${className}`;
+            if (allowHtml) {
+                line.innerHTML = content;
+            } else {
+                line.textContent = content;
             }
-        });
+            terminalOutput.appendChild(line);
+            return line;
+        }
+
+        function clearTerminal() {
+            const welcomeCard = document.getElementById('welcome-card');
+            const welcomeClone = welcomeCard ? welcomeCard.cloneNode(true) : null;
+
+            terminalOutput.innerHTML = '';
+            if (welcomeClone) {
+                welcomeClone.id = 'welcome-card';
+                terminalOutput.appendChild(welcomeClone);
+            }
+
+            appendOutputLine('Terminal cleared. Type help to continue.', 'output-line', false);
+            scrollToBottom();
+        }
 
         async function executeCommand(command) {
             if (command.toLowerCase() === 'clear') {
@@ -515,90 +698,128 @@
                 return;
             }
 
-            // Show loading
-            const loadingLine = addTerminalLine('Processing...', 'output loading');
-            
+            sessionStatus.textContent = `Runtime: Processing ${command.split(' ')[0]} ...`;
+            const loadingLine = appendOutputLine('<span class="scan-progress loading-caret">Processing command</span>', 'loading-line', true);
+
             try {
                 const response = await fetch('/execute', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ command: command })
+                    body: JSON.stringify({ command })
                 });
 
                 const data = await response.json();
-                
-                // Remove loading line
                 loadingLine.remove();
-                
-                // Update prompt
-                prompt.textContent = data.prompt;
-                
-                // Display output
-                if (data.output) {
-                    addTerminalLine(data.output, 'output');
+
+                if (data.prompt) {
+                    promptEl.textContent = data.prompt;
+                    promptPreview.textContent = `Prompt: ${data.prompt.trim()}`;
                 }
-                
+
+                if (data.output) {
+                    appendOutputLine(data.output, 'output-line', true);
+                }
+
+                sessionStatus.textContent = 'Runtime: Command completed';
             } catch (error) {
                 loadingLine.remove();
-                addTerminalLine(`Error: ${error.message}`, 'output error');
+                appendOutputLine(`Error: ${error.message}`, 'output-line error', false);
+                sessionStatus.textContent = 'Runtime: Command failed';
             }
 
-            // Scroll to bottom
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            scrollToBottom();
         }
 
-        function addTerminalLine(content, className) {
-            const line = document.createElement('div');
-            line.className = `terminal-line ${className}`;
-            
-            if (className === 'output') {
-                line.innerHTML = content; // Allow HTML in output for styling
-            } else {
-                line.textContent = content;
+        async function submitCurrentCommand() {
+            const command = commandInput.value.trim();
+            if (!command) {
+                return;
             }
-            
-            terminalOutput.appendChild(line);
-            
-            // Auto-scroll to bottom
-            setTimeout(() => {
-                terminalOutput.scrollTop = terminalOutput.scrollHeight;
-            }, 10);
-            
-            return line;
+
+            commandHistory.push(command);
+            historyIndex = commandHistory.length;
+
+            appendCommandLine(command);
+            commandInput.value = '';
+            await executeCommand(command);
+            commandInput.focus();
         }
 
-        function clearTerminal() {
-            const welcomeBanner = document.querySelector('.welcome-banner');
-            terminalOutput.innerHTML = '';
-            if (welcomeBanner) {
-                terminalOutput.appendChild(welcomeBanner.cloneNode(true));
-            }
-        }
-
-        // Auto-focus input on load
-        window.addEventListener('load', () => {
+        document.addEventListener('click', () => {
             commandInput.focus();
         });
 
-        // Prevent context menu
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
+        commandInput.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                await submitCurrentCommand();
+                return;
+            }
 
-        // Disable text selection except in output
-        document.addEventListener('selectstart', (e) => {
-            if (!e.target.closest('.terminal-output')) {
-                e.preventDefault();
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex -= 1;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex += 1;
+                    commandInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    commandInput.value = '';
+                }
+                return;
+            }
+
+            if (event.key === 'Tab') {
+                event.preventDefault();
+                const currentInput = commandInput.value.toLowerCase();
+                const matches = knownCommands.filter((cmd) => cmd.startsWith(currentInput));
+                if (matches.length === 1) {
+                    commandInput.value = `${matches[0]} `;
+                }
+                return;
+            }
+
+            if (event.ctrlKey && event.key.toLowerCase() === 'l') {
+                event.preventDefault();
+                clearTerminal();
             }
         });
 
-        // Matrix effect enhancement
-        setInterval(() => {
-            const matrixBg = document.querySelector('.matrix-bg');
-            matrixBg.style.transform = `translateY(${Math.random() * 5}px)`;
-        }, 100);
+        runButton.addEventListener('click', async () => {
+            await submitCurrentCommand();
+        });
+
+        document.querySelectorAll('.command-chip').forEach((chip) => {
+            chip.addEventListener('click', async (event) => {
+                const command = event.currentTarget.getAttribute('data-command');
+                if (!command) {
+                    return;
+                }
+                commandInput.value = command;
+                await submitCurrentCommand();
+            });
+        });
+
+        window.addEventListener('load', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            commandInput.focus();
+            scrollToBottom();
+        });
+
+        document.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+        });
     </script>
 </body>
 </html>

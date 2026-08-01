@@ -8,7 +8,8 @@ Your cybersecurity terminal is now fully packaged and ready for distribution to 
 
 #### **Core Applications:**
 - **Web Terminal** (`terminal_web.py`) - CSS-styled browser interface
-- **CLI Terminal** (`app.py`) - Traditional command-line interface
+- **CLI Terminal** (`app.py`) - Interactive command-line interface
+- **Automation CLI** (`cli.py`) - Scriptable scanner entrypoint with JSON output
 - **Launcher** (`launch_terminal.py`) - Interface selector
 
 #### **Installation Scripts:**
@@ -83,10 +84,14 @@ help           # Show all commands
 menu           # Display security tools
 netscan IP     # Network scanning
 vulnscan URL   # Vulnerability assessment
+tlscheck HOST  # TLS posture analysis
 passcheck PWD  # Password analysis
 hash ALG TEXT  # Generate hashes
 ipinfo IP      # IP intelligence
 domain NAME    # Domain analysis
+email ADDRESS  # Email risk analysis
+logs INPUT     # Log threat analysis
+report TYPE    # Security report generation
 clear          # Clear screen
 ```
 
@@ -111,7 +116,7 @@ clear          # Clear screen
 - Security reporting and documentation
 
 ### **Safe and Educational:**
-- All scans are demonstrations and simulations
+- Real analysis modules with non-destructive defaults
 - Designed for authorized testing and education
 - Includes security warnings and best practices
 - Input validation and error handling
@@ -198,7 +203,8 @@ clear          # Clear screen
 ```
 cs-pro/
 ├── terminal_web.py          # Web terminal server
-├── app.py                   # CLI terminal
+├── app.py                   # Interactive CLI terminal launcher
+├── cli.py                   # Automation CLI entrypoint
 ├── launch_terminal.py       # Interface selector
 ├── templates/
 │   └── terminal.html        # CSS-styled UI

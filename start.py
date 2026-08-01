@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-CyberSec Analyst Tool - Startup Script
-Quick launcher for the cybersecurity analysis platform
-"""
+"""CyberSec startup launcher for the web terminal interface."""
 
 import subprocess
 import sys
@@ -11,9 +8,8 @@ import os
 def check_dependencies():
     """Check if required packages are installed"""
     try:
-        import streamlit
-        import pandas
-        import plotly
+        import flask
+        import requests
         print("✅ Core dependencies found")
         return True
     except ImportError as e:
@@ -21,24 +17,18 @@ def check_dependencies():
         return False
 
 def start_application():
-    """Start the Streamlit application"""
+    """Start the CyberSec web terminal application"""
     if not check_dependencies():
-        print("💡 Install dependencies with: pip install streamlit pandas plotly")
+        print("💡 Install dependencies with: pip install -r requirements.txt")
         return False
     
     print("🚀 Starting CyberSec Analyst Platform...")
-    print("🌐 Web interface will open automatically")
-    print("📍 Access at: http://localhost:5500")
+    print("🌐 Web terminal will open automatically")
+    print("📍 Access at: http://127.0.0.1:5000")
     print("⏹️  Press Ctrl+C to stop")
     
     try:
-        # Start Streamlit app
-        subprocess.run([
-            sys.executable, "-m", "streamlit", "run", "app.py",
-            "--server.headless", "false",
-            "--server.port", "5500",
-            "--server.address", "localhost"
-        ])
+        subprocess.run([sys.executable, "terminal_web.py"])
     except KeyboardInterrupt:
         print("\n🛑 Application stopped by user")
     except Exception as e:

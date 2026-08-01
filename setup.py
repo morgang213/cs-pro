@@ -25,6 +25,16 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/morgang213/cs-pro",
     packages=find_packages(),
+    py_modules=[
+        "network_scanner",
+        "vulnerability_scanner",
+        "tls_security_analyzer",
+        "password_analyzer",
+        "hash_utils",
+        "ip_analyzer",
+        "whois_analyzer",
+        "email_analyzer",
+    ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Information Technology",
@@ -50,7 +60,8 @@ setup(
         "requests>=2.25.0",
         "python-whois>=0.8.0",
         "dnspython>=2.0.0",
-        "cryptography>=3.4.0"
+        "cryptography>=3.4.0",
+        "validators>=0.20.0",
     ],
     entry_points={
         "console_scripts": [

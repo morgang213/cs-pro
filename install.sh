@@ -5,6 +5,10 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+INSTALL_DIR="$SCRIPT_DIR"
+
 echo "🛡️  CyberSec Terminal - Installation Script"
 echo "=============================================="
 
@@ -107,7 +111,7 @@ install_requirements() {
         print_success "Requirements installed successfully"
     else
         print_warning "requirements.txt not found. Installing basic packages..."
-        pip install flask colorama requests python-whois dnspython cryptography
+        pip install flask colorama requests python-whois dnspython cryptography validators
     fi
 }
 
@@ -125,36 +129,34 @@ create_shortcuts() {
     
     # Create bin directory
     mkdir -p ~/.local/bin
-    
-    # Create cybersec command
-    cat > ~/.local/bin/cybersec << 'EOF'
+
+    create_launcher_script() {
+        local output_path="$1"
+        local module_name="$2"
+
+        cat > "$output_path" <<EOF
 #!/bin/bash
-cd "$(dirname "$0")/../../"
-source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null
-python -m cybersec_terminal.launcher
+PROJECT_DIR="$INSTALL_DIR"
+VENV_PYTHON="\$PROJECT_DIR/venv/bin/python"
+
+cd "\$PROJECT_DIR" || exit 1
+
+if [ -x "\$VENV_PYTHON" ]; then
+    exec "\$VENV_PYTHON" -m $module_name "\$@"
+fi
+
+exec /usr/bin/env python3 -m $module_name "\$@"
 EOF
-    
-    chmod +x ~/.local/bin/cybersec
-    
-    # Create cybersec-web command
-    cat > ~/.local/bin/cybersec-web << 'EOF'
-#!/bin/bash
-cd "$(dirname "$0")/../../"
-source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null
-python -m cybersec_terminal.web
-EOF
-    
-    chmod +x ~/.local/bin/cybersec-web
-    
-    # Create cybersec-cli command
-    cat > ~/.local/bin/cybersec-cli << 'EOF'
-#!/bin/bash
-cd "$(dirname "$0")/../../"
-source venv/bin/activate 2>/dev/null || source venv/Scripts/activate 2>/dev/null
-python -m cybersec_terminal.cli
-EOF
-    
-    chmod +x ~/.local/bin/cybersec-cli
+
+        chmod +x "$output_path"
+    }
+
+    create_launcher_script ~/.local/bin/cybersec cybersec_terminal.launcher
+    create_launcher_script ~/.local/bin/cybersec-web cybersec_terminal.web
+    create_launcher_script ~/.local/bin/cybersec-terminal cybersec_terminal.cli
+
+    # Backward-compatible alias for older docs/scripts.
+    ln -sf ~/.local/bin/cybersec-terminal ~/.local/bin/cybersec-cli
     
     print_success "Command shortcuts created in ~/.local/bin/"
 }
@@ -188,7 +190,8 @@ main() {
     echo -e "${CYAN}🚀 Quick Start:${NC}"
     echo "  cybersec              - Launch terminal selector"
     echo "  cybersec-web          - Start web terminal"
-    echo "  cybersec-cli          - Start CLI terminal"
+    echo "  cybersec-terminal     - Start CLI terminal"
+    echo "  cybersec-cli          - Legacy CLI alias"
     echo
     echo -e "${CYAN}📚 Documentation:${NC}"
     echo "  README.md             - Main documentation"

@@ -6,7 +6,7 @@
 [![Docker](https://github.com/morgang213/cs-pro/workflows/Docker%20Build%20and%20Push/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/docker.yml)
 [![Code Quality](https://github.com/morgang213/cs-pro/workflows/Code%20Quality%20and%20Documentation/badge.svg)](https://github.com/morgang213/cs-pro/actions/workflows/code-quality.yml)
 
-A comprehensive cybersecurity analysis and assessment platform with a **modern web-based user interface** built with Streamlit, providing a suite of security tools for network scanning, vulnerability assessment, password analysis, and threat intelligence.
+A comprehensive cybersecurity analysis and assessment platform with a modern web terminal interface, providing a suite of security tools for network scanning, vulnerability assessment, password analysis, and threat intelligence.
 
 ## 🌐 Web-Based User Interface
 
@@ -18,14 +18,14 @@ This application provides a **complete web interface** accessible through your b
 python3 start.py
 
 # Option 2: Direct launch
-streamlit run app.py --server.port 5500
+python3 terminal_web.py
 ```
 
-**Access at:** `http://localhost:5500`
+**Access at:** `http://127.0.0.1:5000`
 
 The interface includes:
 - 📊 **Interactive Dashboard** with security metrics
-- 🔧 **19 Integrated Security Tools** 
+- 🔧 **10 Integrated Terminal Security Modules** 
 - 📈 **Real-time Charts and Visualizations**
 - 📄 **Report Generation and Export**
 - 🗂️ **Database Management Interface**
@@ -93,7 +93,9 @@ pip install -r requirements.txt
 # Run application
 python terminal_web.py  # Web Terminal (recommended)
 # OR
-python app.py          # CLI Terminal
+python app.py          # Interactive CLI terminal
+# OR
+python cli.py --help   # Automation CLI options
 ```
 
 ### **Package Installation**
@@ -104,7 +106,25 @@ pip install cybersec-terminal
 # Run commands
 cybersec           # Launch interface selector
 cybersec-web       # Start web terminal
-cybersec-cli       # Start CLI terminal
+cybersec-terminal  # Start CLI mode
+```
+
+### **macOS DMG Builder**
+```bash
+# Build a drag-and-drop macOS installer image
+./build_macos_dmg.sh
+
+# Open the generated installer
+open dist/CyberSec-Terminal-macOS.dmg
+```
+
+Optional release signing/notarization:
+```bash
+# Sign app + DMG
+./build_macos_dmg.sh --codesign-identity "Developer ID Application: Example Co (TEAMID)"
+
+# Sign + notarize with a preconfigured notarytool keychain profile
+./build_macos_dmg.sh --codesign-identity "Developer ID Application: Example Co (TEAMID)" --notarize --notary-profile "AC_PASSWORD_PROFILE"
 ```
 
 ## Usage
@@ -123,13 +143,22 @@ cybersec-web
 
 #### **2. CLI Terminal**
 ```bash
-# Launch command-line interface
+# Launch interactive command-line terminal
 python app.py
 # OR
-cybersec-cli
+cybersec-terminal
 ```
 
-#### **3. Interface Selector**
+#### **3. Automation CLI**
+```bash
+# Scriptable scanner commands
+python cli.py --scan 127.0.0.1 --type quick
+python cli.py --vuln https://example.com --assessment web --aggressive
+python cli.py --tls example.com --tls-port 443
+python cli.py --json --scan 127.0.0.1 --type port --ports 22,80,443
+```
+
+#### **4. Interface Selector**
 ```bash
 # Choose between web and CLI
 python launch_terminal.py
@@ -137,15 +166,19 @@ python launch_terminal.py
 cybersec
 ```
 
-### **Web Terminal Commands:**
+### **Terminal Commands:**
 - `help` - Show all available commands
 - `menu` - Display security modules
 - `netscan <target>` - Network port scanning
-- `vulnscan <url>` - Web vulnerability assessment
+- `vulnscan <target> [web|network|ssl]` - Vulnerability assessment modes
+- `tlscheck <target> [port]` - TLS certificate/protocol analysis
 - `passcheck <password>` - Password strength analysis
 - `hash <algorithm> <text>` - Generate cryptographic hashes
 - `ipinfo <ip>` - IP geolocation and reputation
 - `domain <domain>` - WHOIS and DNS analysis
+- `email <address> [--content <text>]` - Email address/content risk analysis
+- `logs [--file <path>] [--type <parser>] <log text>` - Log threat analysis
+- `report [vulnerability|network|comprehensive] [--title <name>]` - Security report generation
 - `clear` - Clear terminal screen
 
 ### **Example Usage:**
@@ -155,6 +188,9 @@ netscan 192.168.1.1
 
 # Vulnerability assessment
 vulnscan https://example.com
+
+# TLS analysis
+tlscheck example.com 443
 
 # Password analysis
 passcheck "MySecurePassword123!"
@@ -199,9 +235,8 @@ Set these as environment variables to enable enhanced features.
 ## Architecture
 
 ### Frontend
-- **Streamlit**: Interactive web application framework
-- **Plotly**: Data visualization and charting
-- **Responsive Design**: Wide layout with expandable sidebar
+- **Flask + HTML/CSS terminal UI**: Browser-based interactive terminal
+- **Responsive Design**: Keyboard-first command interface
 
 ### Backend
 - **Modular Design**: Separate utility classes for each analysis type
@@ -216,47 +251,47 @@ Set these as environment variables to enable enhanced features.
 
 ## Tool Modules
 
-### Network Scanner (`utils/network_scanner.py`)
+### Network Scanner (`network_scanner.py`)
 - Port scanning with customizable ranges
 - Service identification and OS detection
 - Concurrent scanning capabilities
 
-### Vulnerability Scanner (`utils/vulnerability_scanner.py`)
+### Vulnerability Scanner (`vulnerability_scanner.py`)
 - Web application security testing
 - SSL/TLS configuration analysis
 - Common vulnerability detection
 
-### Password Analyzer (`utils/password_analyzer.py`)
+### Password Analyzer (`password_analyzer.py`)
 - Entropy calculation and complexity assessment
 - Pattern detection and strength scoring
 - Security recommendations
 
-### Hash Utils (`utils/hash_utils.py`)
+### Hash Utils (`hash_utils.py`)
 - Multiple hash algorithm support
 - File hash generation and verification
 - HMAC and password hashing capabilities
 
-### IP Analyzer (`utils/ip_analyzer.py`)
+### IP Analyzer (`ip_analyzer.py`)
 - Geolocation and network information
 - Threat intelligence integration
 - Reputation scoring
 
-### WHOIS Analyzer (`utils/whois_analyzer.py`)
+### WHOIS Analyzer (`whois_analyzer.py`)
 - Domain registration information
 - DNS record analysis
 - Security assessment and recommendations
 
-### Email Analyzer (`utils/email_analyzer.py`)
+### Email Analyzer (`email_analyzer.py`)
 - Email address security analysis
 - Content scanning for threats
 - Phishing and spam detection
 
-### Log Analyzer (`utils/log_analyzer.py`)
+### Log Analyzer (`log_analyzer.py`)
 - Multi-format log parsing
 - Security event detection
 - Threat pattern analysis
 
-### Report Generator (`utils/report_generator.py`)
+### Report Generator (`report_generator.py`)
 - Comprehensive security reports
 - Multiple export formats
 - Template-based reporting

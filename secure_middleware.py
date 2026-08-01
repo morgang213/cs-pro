@@ -9,6 +9,11 @@ import logging
 from typing import Any, Callable, Dict, Optional
 from .security_hardening import SecurityHardening
 
+try:
+    from ui_helpers import UIHelpers
+except Exception:  # pragma: no cover - optional import path
+    UIHelpers = None
+
 class SecureMiddleware:
     """Middleware for securing Streamlit inputs and operations"""
     
@@ -158,6 +163,9 @@ class SecureMiddleware:
     
     def show_security_status(self):
         """Display security status in sidebar"""
+        if UIHelpers is not None:
+            UIHelpers.ensure_professional_ui()
+
         # Initialize session state variables if they don't exist
         if 'security_violations' not in st.session_state:
             st.session_state.security_violations = []
@@ -208,6 +216,9 @@ secure_middleware = SecureMiddleware()
 def secure_text_input(label: str, value: str = "", max_chars: int = None, 
                      input_type: str = 'general', key: Optional[str] = None) -> Optional[str]:
     """Secure text input with validation"""
+    if UIHelpers is not None:
+        UIHelpers.ensure_professional_ui()
+
     user_input = st.text_input(label, value=value, max_chars=max_chars, key=key)
     
     if user_input:
@@ -227,6 +238,9 @@ def secure_text_input(label: str, value: str = "", max_chars: int = None,
 def secure_text_area(label: str, value: str = "", height: int = None, 
                     max_chars: int = None, key: Optional[str] = None) -> Optional[str]:
     """Secure text area with validation"""
+    if UIHelpers is not None:
+        UIHelpers.ensure_professional_ui()
+
     user_input = st.text_area(label, value=value, height=height, max_chars=max_chars, key=key)
     
     if user_input:
@@ -237,6 +251,9 @@ def secure_text_area(label: str, value: str = "", height: int = None,
 def secure_file_uploader(label: str, type: Optional[list] = None, 
                         key: Optional[str] = None) -> Any:
     """Secure file uploader with validation"""
+    if UIHelpers is not None:
+        UIHelpers.ensure_professional_ui()
+
     uploaded_file = st.file_uploader(label, type=type, key=key)
     
     if uploaded_file is not None:

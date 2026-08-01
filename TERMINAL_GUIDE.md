@@ -70,9 +70,10 @@ python terminal_web.py
 | `04` | `hash` | Hash Utilities | `hash md5 "hello world"` |
 | `05` | `ipinfo` | IP Intelligence | `ipinfo 8.8.8.8` |
 | `06` | `domain` | Domain Analysis | `domain google.com` |
-| `07` | `email` | Email Security | `email` |
-| `08` | `logs` | Log Analyzer | `logs` |
-| `09` | `report` | Report Generator | `report` |
+| `07` | `email` | Email Security | `email security@example.com --content "verify account"` |
+| `08` | `logs` | Log Analyzer | `logs --type ssh "failed password"` |
+| `09` | `report` | Report Generator | `report comprehensive --title "Weekly Snapshot"` |
+| `10` | `tlscheck` | TLS Analyzer | `tlscheck example.com 443` |
 
 ## 🎨 Design Features
 
@@ -132,7 +133,7 @@ python terminal_web.py
 
 ### **Python Packages**
 ```bash
-pip install flask colorama
+pip install -r requirements.txt
 ```
 
 ### **System Requirements**
@@ -164,10 +165,10 @@ pip install flask colorama
 ## 🔒 Security Considerations
 
 ### **Safe by Design**
-- All scans are simulated demonstrations
-- No actual network intrusion capabilities
+- Real analysis modules with non-destructive defaults
 - Educational and authorized testing only
 - Proper input validation and sanitization
+- Explicit operator responsibility for legal/approved usage
 
 ### **Responsible Use**
 - ⚠️ **Only use on systems you own or have permission to test**
